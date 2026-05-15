@@ -20,16 +20,35 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Check if user is already authenticated (both client-side state and server session)
   useEffect(() => {
-    if (isAuthenticated) {
-      router.replace("/");
-    }
+    const checkAuth = async () => {
+      if (isAuthenticated) {
+        // Verify server session is still valid
+        try {
+          const res = await fetch("/api/method/frappe.auth.get_logged_user", {
+            credentials: "same-origin",
+          });
+          if (res.ok) {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get("redirect");
+            router.replace(redirect || "/");
+            return;
+          }
+        } catch {
+          // Session invalid, stay on login
+        }
+      }
+      setIsCheckingAuth(false);
+    };
+    checkAuth();
   }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,15 +85,16 @@ export default function LoginPage() {
     }
   };
 
-  if (!mounted) return null;
+  // Don't render anything while checking auth or before hydration — prevents flicker
+  if (!mounted || isCheckingAuth) return null;
 
   return (
-    <div className="min-h-screen bg-background flex overflow-hidden selection:bg-teal-500/30 transition-colors duration-500">
+    <div className="min-h-screen bg-background flex overflow-hidden selection:bg-primary/30 transition-colors duration-500">
       {/* ── Theme Toggle ── */}
       <div className="fixed top-6 right-6 z-50">
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="h-11 w-11 rounded-xl border border-border bg-card/50 backdrop-blur-xl flex items-center justify-center text-foreground hover:border-teal-500/40 hover:bg-teal-500/10 transition-all shadow-xl shadow-black/5 group"
+          className="h-11 w-11 rounded-xl border border-border bg-card/50 backdrop-blur-xl flex items-center justify-center text-foreground hover:border-primary/40 hover:bg-primary/10 transition-all shadow-xl shadow-black/5 group"
         >
           <Sun className="h-5 w-5 rotate-0 scale-100 dark:-rotate-90 dark:scale-0 transition-all group-hover:rotate-12" />
           <Moon className="h-5 w-5 absolute rotate-90 scale-0 dark:rotate-0 dark:scale-100 transition-all group-hover:-rotate-12" />
@@ -100,7 +120,7 @@ export default function LoginPage() {
 
           {/* Gradient Mesh Base */}
           <div className="absolute inset-0 opacity-40 dark:opacity-100 transition-opacity">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_30%_70%,rgba(20,184,166,0.12),transparent),radial-gradient(ellipse_60%_40%_at_70%_30%,rgba(56,189,248,0.08),transparent)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_30%_70%,rgba(30,64,175,0.12),transparent),radial-gradient(ellipse_60%_40%_at_70%_30%,rgba(56,189,248,0.08),transparent)]" />
           </div>
 
           {/* Floating Orbs */}
@@ -111,7 +131,7 @@ export default function LoginPage() {
               scale: [1, 1.06, 0.94, 1.04, 1]
             }}
             transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[-5%] left-[-10%] w-[400px] h-[400px] rounded-full bg-teal-500/10 blur-[80px]"
+            className="absolute top-[-5%] left-[-10%] w-[400px] h-[400px] rounded-full bg-primary/10 blur-[80px]"
           />
           <motion.div
             animate={{
@@ -120,7 +140,7 @@ export default function LoginPage() {
               scale: [1, 1.05, 0.95, 1.03, 1]
             }}
             transition={{ duration: 22, repeat: Infinity, ease: "linear", delay: 2 }}
-            className="absolute bottom-[-8%] right-[-5%] w-[350px] h-[350px] rounded-full bg-blue-500/10 blur-[80px]"
+            className="absolute bottom-[-8%] right-[-5%] w-[350px] h-[350px] rounded-full bg-primary/10 blur-[80px]"
           />
 
           {/* Brand Content */}
@@ -130,14 +150,14 @@ export default function LoginPage() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-teal-500/20"
+                className="absolute inset-0 rounded-full border-2 border-primary/20"
               >
-                <div className="absolute top-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.5)]" />
+                <div className="absolute top-[-5px] left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-primary shadow-lg shadow-primary/50" />
               </motion.div>
               <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-[15px] rounded-full border-2 border-dashed border-blue-500/15"
+                className="absolute inset-[15px] rounded-full border-2 border-dashed border-primary/15"
               />
 
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-2xl bg-card/60 backdrop-blur-xl border border-border flex items-center justify-center shadow-2xl shadow-black/10">
@@ -152,7 +172,7 @@ export default function LoginPage() {
               className="text-4xl font-black tracking-tight text-foreground leading-tight mb-4"
             >
               Manage your practice<br />
-              with <span className="bg-gradient-to-r from-teal-500 to-teal-300 dark:from-teal-400 dark:to-teal-200 bg-clip-text text-transparent">CADesk365</span>
+              with <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">CADesk365</span>
             </motion.h2>
 
             <motion.p
@@ -179,9 +199,9 @@ export default function LoginPage() {
               ].map((f) => (
                 <div
                   key={f.label}
-                  className="px-4 py-2 rounded-full text-xs font-bold text-foreground/70 border border-border bg-card/50 backdrop-blur-md hover:border-teal-500/30 hover:bg-teal-500/5 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-default flex items-center gap-2"
+                  className="px-4 py-2 rounded-full text-xs font-bold text-foreground/70 border border-border bg-card/50 backdrop-blur-md hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all cursor-default flex items-center gap-2"
                 >
-                  <f.icon className="h-3.5 w-3.5 text-teal-500" />
+                  <f.icon className="h-3.5 w-3.5 text-primary" />
                   {f.label}
                 </div>
               ))}
@@ -189,14 +209,14 @@ export default function LoginPage() {
           </div>
 
           <div className="absolute bottom-8 text-[10px] text-muted-foreground/30 font-bold tracking-[0.3em] uppercase">
-            CADesk365 Enterprise Practice Suite
+            CADesk365
           </div>
         </div>
 
         {/* ── Right: Login Form ── */}
         <div className="flex items-center justify-center p-8 bg-background relative overflow-hidden transition-colors duration-500">
           {/* Background Wash */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_90%,rgba(20,184,166,0.03),transparent)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_90%,rgba(30,64,175,0.03),transparent)] pointer-events-none" />
 
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -210,8 +230,8 @@ export default function LoginPage() {
           >
             {/* Header */}
             <div className="mb-10">
-              <div className="flex items-center gap-3 text-teal-600 dark:text-teal-400 text-[11px] font-black tracking-[0.2em] uppercase mb-4">
-                <div className="w-8 h-[2px] bg-teal-500 rounded-full" />
+              <div className="flex items-center gap-3 text-primary text-[11px] font-black tracking-[0.2em] uppercase mb-4">
+                <div className="w-8 h-[2px] bg-primary rounded-full" />
                 Welcome back
               </div>
               <h1 className="text-4xl font-black tracking-tight text-foreground mb-2">Sign in to your account</h1>
@@ -242,7 +262,7 @@ export default function LoginPage() {
                   Email address
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-teal-500 transition-colors">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
                     <Mail className="h-[18px] w-[18px]" />
                   </div>
                   <input
@@ -251,7 +271,7 @@ export default function LoginPage() {
                     placeholder="you@company.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-[54px] rounded-xl border border-border bg-card/30 backdrop-blur-sm pl-12 pr-4 text-sm font-medium text-foreground focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 transition-all placeholder:text-muted-foreground/30"
+                    className="w-full h-[54px] rounded-xl border border-border bg-card/30 backdrop-blur-sm pl-12 pr-4 text-sm font-medium text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30"
                     autoComplete="email"
                   />
                 </div>
@@ -262,7 +282,7 @@ export default function LoginPage() {
                   Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-teal-500 transition-colors">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
                     <Lock className="h-[18px] w-[18px]" />
                   </div>
                   <input
@@ -271,13 +291,13 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-[54px] rounded-xl border border-border bg-card/30 backdrop-blur-sm pl-12 pr-12 text-sm font-medium text-foreground focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500/50 transition-all placeholder:text-muted-foreground/30"
+                    className="w-full h-[54px] rounded-xl border border-border bg-card/30 backdrop-blur-sm pl-12 pr-12 text-sm font-medium text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all placeholder:text-muted-foreground/30"
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-teal-500 hover:bg-teal-500/10 transition-all"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -287,7 +307,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading || isSuccess}
-                className="w-full h-[56px] mt-4 rounded-xl bg-gradient-to-r from-teal-500 to-teal-400 dark:from-teal-600 dark:to-teal-500 text-white dark:text-white font-black text-base shadow-2xl shadow-teal-500/25 hover:shadow-teal-500/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 transition-all group overflow-hidden relative"
+                className="w-full h-[56px] mt-4 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-black text-base shadow-2xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 transition-all group overflow-hidden relative"
               >
                 <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shine-sweep_2s_infinite]" />
 

@@ -93,7 +93,7 @@ export default function AttendanceReportPage() {
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
       {/* Page Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col space-y-2"
@@ -113,7 +113,7 @@ export default function AttendanceReportPage() {
 
       {/* Stats Cards */}
       {stats.length > 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -136,7 +136,7 @@ export default function AttendanceReportPage() {
       )}
 
       {/* Filters */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -175,7 +175,7 @@ export default function AttendanceReportPage() {
       </motion.div>
 
       {/* Report Table */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}

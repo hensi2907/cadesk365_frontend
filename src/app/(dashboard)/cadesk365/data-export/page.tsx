@@ -174,7 +174,7 @@ export default function DataExportPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-24">
+    <div className="space-y-6 fluid-container pb-24">
       <PageHeader
         title="Data Export"
         description="Select a DocType, choose your fields, apply filters, and export your data safely."

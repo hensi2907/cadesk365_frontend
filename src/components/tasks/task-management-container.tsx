@@ -332,7 +332,7 @@ export function TaskManagementContainer({ tab, readOnly = false }: TaskManagemen
   }
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto">
+    <div className="space-y-6 fluid-container">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}

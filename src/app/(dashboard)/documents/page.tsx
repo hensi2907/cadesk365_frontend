@@ -248,7 +248,7 @@ export default function DocumentsPage() {
       />
 
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="auto-grid auto-grid-lg">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="h-[200px] rounded-xl bg-card border animate-pulse" />
           ))}
@@ -278,7 +278,7 @@ export default function DocumentsPage() {
                   {docs.length} {docs.length === 1 ? 'file' : 'files'}
                 </span>
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              <div className="auto-grid auto-grid-lg">
                 {docs.map(doc => (
                   <DocumentCard key={doc.name} doc={doc} />
                 ))}

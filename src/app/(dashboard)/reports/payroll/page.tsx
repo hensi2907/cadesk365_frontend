@@ -3,21 +3,21 @@
 import * as React from "react";
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getPayrollSummary, getEmployeePayrollDetails } from "@/lib/api/payroll";
+import { getPayrollSummary, getEmployeePayrollDetails, getPayrollFiltersData } from "@/lib/api/payroll";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { ChartCard } from "@/components/shared/lazy-chart-card";
 import { DataTable } from "@/components/shared/data-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { 
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription 
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
 } from "@/components/ui/sheet";
-import { 
-  Search, Info, IndianRupee, Users, Wallet, FileText, Download, 
+import {
+  Search, Info, IndianRupee, Users, Wallet, FileText, Download,
   TrendingUp, TrendingDown, Clock, Building, ArrowUpRight
 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -37,8 +37,8 @@ const VarianceIndicator = ({ value, label, inverse = false }: { value?: number, 
   const isGood = inverse ? !isUp : isUp;
   return (
     <span className="flex items-center gap-1.5 mt-1">
-      {isUp ? <TrendingUp className={cn("h-3.5 w-3.5", isGood ? "text-emerald-500" : "text-rose-500")} /> : 
-              <TrendingDown className={cn("h-3.5 w-3.5", isGood ? "text-emerald-500" : "text-rose-500")} />}
+      {isUp ? <TrendingUp className={cn("h-3.5 w-3.5", isGood ? "text-emerald-500" : "text-rose-500")} /> :
+        <TrendingDown className={cn("h-3.5 w-3.5", isGood ? "text-emerald-500" : "text-rose-500")} />}
       <span className={cn("font-medium", isGood ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
         {Math.abs(value).toFixed(1)}% vs prev
       </span>
@@ -52,7 +52,7 @@ function PayrollSummaryContent() {
   const [department, setDepartment] = React.useState("all");
   const [status, setStatus] = React.useState("all");
   const [selectedSlip, setSelectedSlip] = React.useState<string | null>(null);
-  
+
   const [activeFilters, setActiveFilters] = React.useState({
     employee: "",
     department: "",
@@ -74,6 +74,11 @@ function PayrollSummaryContent() {
     enabled: !!selectedSlip,
   });
 
+  const { data: filtersData } = useQuery({
+    queryKey: ["payroll-filters-data"],
+    queryFn: getPayrollFiltersData,
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setActiveFilters({ employee, department, status });
@@ -87,11 +92,11 @@ function PayrollSummaryContent() {
   };
 
   const columns = React.useMemo<ColumnDef<any>[]>(() => [
-    { 
-      accessorKey: "employee_name", 
+    {
+      accessorKey: "employee_name",
       header: "Employee",
       cell: ({ row }) => (
-        <div 
+        <div
           className="cursor-pointer group flex items-center gap-2"
           onClick={() => setSelectedSlip(row.original.name)}
         >
@@ -104,23 +109,23 @@ function PayrollSummaryContent() {
     },
     { accessorKey: "department", header: "Department" },
     { accessorKey: "designation", header: "Designation" },
-    { 
-      accessorKey: "gross_pay", 
+    {
+      accessorKey: "gross_pay",
       header: "Gross Salary",
       cell: ({ row }) => <span className="font-medium">{formatCurrency(row.getValue("gross_pay"))}</span>
     },
-    { 
-      accessorKey: "total_deduction", 
+    {
+      accessorKey: "total_deduction",
       header: "Deductions",
       cell: ({ row }) => <span className="text-rose-500">{formatCurrency(row.getValue("total_deduction"))}</span>
     },
-    { 
-      accessorKey: "net_pay", 
+    {
+      accessorKey: "net_pay",
       header: "Net Salary",
       cell: ({ row }) => <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{formatCurrency(row.getValue("net_pay"))}</span>
     },
-    { 
-      accessorKey: "status", 
+    {
+      accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
         const docstatus = row.original.docstatus;
@@ -128,8 +133,8 @@ function PayrollSummaryContent() {
           <span className={cn(
             "px-2.5 py-0.5 rounded-full text-xs font-medium",
             docstatus === 1 ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800" :
-            docstatus === 0 ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800" :
-            "bg-muted text-muted-foreground border border-border"
+              docstatus === 0 ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800" :
+                "bg-muted text-muted-foreground border border-border"
           )}>
             {docstatus === 1 ? "Paid" : docstatus === 0 ? "Pending" : "Cancelled"}
           </span>
@@ -141,45 +146,43 @@ function PayrollSummaryContent() {
   const departmentColors = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#6366f1"];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-10">
+    <div className="space-y-6 fluid-container pb-10">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 rounded-lg border bg-card p-4 shadow-sm">
-        <PageHeader 
-          title="Payroll Analytics" 
-          description="Enterprise payroll insights and processing dashboard." 
-          className="mb-0 shrink-0" 
+        <PageHeader
+          title="Payroll Analytics"
+          description="Enterprise payroll insights and processing dashboard."
+          className="mb-0 shrink-0"
         />
         <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
-          <Input 
-            placeholder="Employee Name/ID..." 
-            value={employee} 
-            onChange={(e) => setEmployee(e.target.value)} 
-            className="w-[180px] h-9" 
+          <Input
+            placeholder="Employee Name/ID..."
+            value={employee}
+            onChange={(e) => setEmployee(e.target.value)}
+            className="w-[180px] h-9"
           />
-          <Select value={department} onValueChange={setDepartment}>
+          <Select value={department} onValueChange={(val) => { setDepartment(val); setActiveFilters({ employee, department: val, status }); }}>
             <SelectTrigger className="w-[150px] h-9">
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Depts</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Sales">Sales</SelectItem>
-              <SelectItem value="HR">HR</SelectItem>
-              <SelectItem value="Marketing">Marketing</SelectItem>
-              <SelectItem value="Operations">Operations</SelectItem>
-              <SelectItem value="Finance">Finance</SelectItem>
+              {filtersData?.departments.map((dept) => (
+                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={status} onValueChange={(val) => { setStatus(val); setActiveFilters({ employee, department, status: val }); }}>
             <SelectTrigger className="w-[130px] h-9">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="Submitted">Paid</SelectItem>
-              <SelectItem value="Draft">Pending</SelectItem>
+              {filtersData?.statuses.map((s) => (
+                <SelectItem key={s} value={s}>{s === 'Submitted' ? 'Submitted (Paid)' : s === 'Draft' ? 'Draft (Pending)' : s}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Button type="submit" variant="default" size="sm" className="h-9">
+          <Button type="submit" variant="default" size="sm" className="h-9 !bg-primary/80">
             <Search className="h-3.5 w-3.5 mr-1.5" /> Analyze
           </Button>
           {(activeFilters.employee || activeFilters.department || activeFilters.status) && (
@@ -210,34 +213,34 @@ function PayrollSummaryContent() {
       ) : (
         <div className="space-y-6 fade-in">
           {/* KPI Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard 
-              title="Processed Employees" 
-              value={data.kpis.total_employees} 
+          <div className="auto-grid auto-grid-md">
+            <StatCard
+              title="Processed Employees"
+              value={data.kpis.total_employees}
               icon={Users}
-              description={<VarianceIndicator value={data.kpis.variances?.employees_variance} label="Active in period" />} 
+              description={<VarianceIndicator value={data.kpis.variances?.employees_variance} label="Active in period" />}
               variant="info"
             />
-            <StatCard 
-              title="Net Salary Paid" 
-              value={formatCurrency(data.kpis.total_salary_paid)} 
+            <StatCard
+              title="Net Salary Paid"
+              value={formatCurrency(data.kpis.total_salary_paid)}
               icon={IndianRupee}
-              description={<VarianceIndicator value={data.kpis.variances?.salary_variance} label={`${formatCurrency(data.kpis.total_gross_pay)} Gross`} />} 
-              variant="success" 
+              description={<VarianceIndicator value={data.kpis.variances?.salary_variance} label={`${formatCurrency(data.kpis.total_gross_pay)} Gross`} />}
+              variant="success"
             />
-            <StatCard 
-              title="Total Deductions" 
-              value={formatCurrency(data.kpis.total_deductions)} 
+            <StatCard
+              title="Total Deductions"
+              value={formatCurrency(data.kpis.total_deductions)}
               icon={Wallet}
-              description={<VarianceIndicator value={data.kpis.variances?.deductions_variance} label="Tax & deductions" inverse />} 
-              variant="danger" 
+              description={<VarianceIndicator value={data.kpis.variances?.deductions_variance} label="Tax & deductions" inverse />}
+              variant="danger"
             />
-            <StatCard 
-              title="Pending Payrolls" 
-              value={data.kpis.pending_payrolls} 
+            <StatCard
+              title="Pending Payrolls"
+              value={data.kpis.pending_payrolls}
               icon={FileText}
-              description={`${data.kpis.paid_payrolls} paid successfully`} 
-              variant={data.kpis.pending_payrolls > 0 ? "warning" : "default"} 
+              description={`${data.kpis.paid_payrolls} paid successfully`}
+              variant={data.kpis.pending_payrolls > 0 ? "warning" : "default"}
             />
           </div>
 
@@ -267,15 +270,15 @@ function PayrollSummaryContent() {
               </div>
 
               <div className="lg:col-span-2">
-                <ChartCard 
-                  title="Monthly Payroll Trend" 
-                  type="bar" 
+                <ChartCard
+                  title="Monthly Payroll Trend"
+                  type="bar"
                   data={data.charts.monthly_trends.labels.map((label, i) => ({
                     name: label,
                     value: data.charts.monthly_trends.values[i]
-                  }))} 
-                  colors={["#3b82f6"]} 
-                  height={300} 
+                  }))}
+                  colors={["#3b82f6"]}
+                  height={300}
                 />
               </div>
             </div>
@@ -291,10 +294,10 @@ function PayrollSummaryContent() {
               </Button>
             </div>
             <div className="p-0">
-              <DataTable 
-                columns={columns} 
-                data={data.data || []} 
-                pageSize={10} 
+              <DataTable
+                columns={columns}
+                data={data.data || []}
+                pageSize={10}
               />
             </div>
           </div>
@@ -322,12 +325,12 @@ function PayrollSummaryContent() {
                   <span className={cn(
                     "px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider",
                     slipDetails.slip_details.docstatus === 1 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                   )}>
                     {slipDetails.slip_details.docstatus === 1 ? "Paid" : "Pending"}
                   </span>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="p-3 bg-card border rounded-lg shadow-sm">
                     <p className="text-xs text-muted-foreground mb-1">Net Payable</p>
@@ -346,7 +349,7 @@ function PayrollSummaryContent() {
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Salary Breakdown</h4>
                   </div>
-                  
+
                   <div className="rounded-xl border overflow-hidden">
                     <div className="p-3 bg-muted/30 border-b flex justify-between font-medium text-sm">
                       <span>Earnings</span>
@@ -360,7 +363,7 @@ function PayrollSummaryContent() {
                         </div>
                       ))}
                     </div>
-                    
+
                     <div className="p-3 bg-muted/30 border-y flex justify-between font-medium text-sm">
                       <span>Deductions</span>
                       <span className="text-right text-rose-500">{formatCurrency(slipDetails.slip_details.total_deduction)}</span>
@@ -388,7 +391,7 @@ function PayrollSummaryContent() {
                       <p className="text-xs text-muted-foreground mt-1">Logged this period</p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Users className="h-4 w-4" /> Attendance
@@ -404,14 +407,14 @@ function PayrollSummaryContent() {
 
               {/* Actions Footer */}
               <div className="p-4 border-t bg-card flex gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => window.open(`/api/method/frappe.utils.print_format.download_pdf?doctype=Salary%20Slip&name=${selectedSlip}&format=Enterprise%20Salary%20Slip`, '_blank')}
                 >
                   <Download className="h-4 w-4 mr-2" /> PDF
                 </Button>
-                <Button 
+                <Button
                   className="flex-1"
                   onClick={() => window.open(`/cadesk365/salary-slip/${selectedSlip}`, '_blank')}
                 >

@@ -41,7 +41,7 @@ export default function DashboardLayout({
     // Redirect if API explicitly fails or if we are done loading and have no auth/data
     if (isError || (!isLoading && !data && !isAuthenticated)) {
       const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-      
+
       // Avoid redirect loops
       if (pathname !== "/login" && pathname !== "/") {
         router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
@@ -50,6 +50,11 @@ export default function DashboardLayout({
       }
     }
   }, [isError, isLoading, data, isAuthenticated, router, pathname, searchParams]);
+
+  // Show nothing while verifying auth — prevents flash of dashboard for unauthenticated users
+  if (isLoading || (!data && !isAuthenticated && !isError)) {
+    return <div className="min-h-screen bg-background" />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,7 +66,7 @@ export default function DashboardLayout({
         )}
       >
         <Topbar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:px-10 lg:py-8">
           {children}
         </main>
       </div>

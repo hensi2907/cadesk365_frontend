@@ -59,7 +59,7 @@ export default function ClientDocuments() {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-8 fluid-container space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight">Documents</h1>
@@ -88,7 +88,7 @@ export default function ClientDocuments() {
             <p className="mt-2 text-[10px] text-muted-foreground font-bold">15% OF 10GB USED</p>
           </CardContent>
         </Card>
-        
+
         <Card className="rounded-2xl border-none bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Recent Uploads</CardTitle>
@@ -114,9 +114,9 @@ export default function ClientDocuments() {
         <div className="p-4 flex items-center justify-between border-b border-border/50 mb-2">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input 
-              type="text" 
-              placeholder="Search files..." 
+            <input
+              type="text"
+              placeholder="Search files..."
               className="w-full h-9 bg-muted/50 border-none rounded-lg pl-9 text-sm focus:ring-1 focus:ring-primary/50 outline-none"
             />
           </div>
@@ -128,9 +128,9 @@ export default function ClientDocuments() {
           pageSize={10}
         />
       </div>
-      
+
       {/* Upload Dropzone Placeholder */}
-      <motion.div 
+      <motion.div
         whileHover={{ scale: 1.01 }}
         className="border-2 border-dashed border-primary/20 bg-primary/5 rounded-[2rem] p-12 flex flex-col items-center justify-center text-center gap-4 cursor-pointer hover:bg-primary/10 transition-colors"
       >

@@ -39,10 +39,10 @@ export function Sidebar() {
     const isMoreSpecificMatch = (navItems: NavItem[]): boolean => {
       return navItems.some((other) => {
         if (other === item) return false;
-        
+
         const otherMatches = pathname === other.href || pathname.startsWith(other.href + "/");
         if (otherMatches && other.href.length > item.href.length) return true;
-        
+
         if (other.children) return isMoreSpecificMatch(other.children);
         return false;
       });
@@ -103,12 +103,11 @@ export function Sidebar() {
     <div className="flex flex-col h-full">
       {/* Brand */}
       <div className="px-4 py-4 flex items-center gap-2.5">
-        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center p-1">
+        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center p-1 cursor-pointer" onClick={() => window.location.href = "/"}>
           <img src="/favicon.ico" alt="CADesk365 Logo" className="h-full w-full object-contain" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold tracking-tight">CADesk365</span>
-          <span className="text-[10px] text-muted-foreground">Practice Suite</span>
+          <span className="text-sm font-semibold tracking-tight cursor-pointer" onClick={() => window.location.href = "/"}>CADesk365</span>
         </div>
       </div>
 

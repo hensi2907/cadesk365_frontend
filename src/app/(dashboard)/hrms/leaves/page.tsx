@@ -72,7 +72,7 @@ export default function LeavesPage() {
 
       <div>
         <h3 className="mb-4 text-lg font-medium text-foreground">Current Balances</h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="auto-grid auto-grid-md">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-xl border bg-card p-5 h-[120px] shadow-sm flex flex-col justify-between">

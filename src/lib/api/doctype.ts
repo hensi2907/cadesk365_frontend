@@ -92,6 +92,25 @@ export async function getDoctypeRecord<T = FrappeDocument>(
 }
 
 /**
+ * Fetch specific fields from a document record.
+ */
+export async function getDoctypeValue(
+  doctype: string,
+  name: string,
+  fieldname: string | string[]
+): Promise<any> {
+  const resolvedDoctype = resolveDoctypeFromSlug(doctype);
+  const params = new URLSearchParams({
+    doctype: resolvedDoctype,
+    filters: JSON.stringify({ name }),
+    fieldname: typeof fieldname === "string" ? fieldname : JSON.stringify(fieldname),
+  });
+  // Frappe's get_value returns { message: { fieldname: value } } or { message: value }
+  const res = await fetchAPI<any>(`/api/method/frappe.client.get_value?${params.toString()}`);
+  return res;
+}
+
+/**
  * Insert a new document.
  */
 export async function insertDoctypeRecord<T = FrappeDocument>(

@@ -9,8 +9,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { 
-  Upload, Download, FileText, CheckCircle2, AlertCircle, 
+import {
+  Upload, Download, FileText, CheckCircle2, AlertCircle,
   Clock, ShieldCheck
 } from "lucide-react";
 
@@ -109,9 +109,9 @@ export default function ClientPortalDashboard() {
   if (isLoading) return null; // Handled by layout
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full space-y-10">
+    <div className="p-8 fluid-container w-full space-y-10">
       {/* Welcome Banner */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-[2rem] bg-[#1e1b4b] p-10 text-white shadow-2xl"
@@ -126,7 +126,7 @@ export default function ClientPortalDashboard() {
           </div>
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 leading-[1.1]">
-              Your practice compliance, <br/>
+              Your practice compliance, <br />
               <span className="text-primary/80">fully managed.</span>
             </h1>
             <p className="text-slate-300 text-lg">

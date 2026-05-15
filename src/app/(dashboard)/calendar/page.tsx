@@ -19,6 +19,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
+  const [selectedDay, setSelectedDay] = React.useState<number | null>(new Date().getDate());
   const [filters, setFilters] = React.useState({
     monthly: true,
     quarterly: true,
@@ -32,10 +33,12 @@ export default function CalendarPage() {
 
   const prevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setSelectedDay(1);
   };
 
   const nextMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setSelectedDay(1);
   };
 
   const currentMonthStr = MONTHS[currentDate.getMonth()];
@@ -55,28 +58,13 @@ export default function CalendarPage() {
     const currentMonthIdx = currentDate.getMonth();
 
     data.forEach((event: any) => {
-      const freq = event.frequency?.toLowerCase() || "monthly";
-      let shouldShow = false;
-
-      if (freq === "monthly") {
-        shouldShow = true;
-      } else if (freq === "quarterly") {
-        const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0,3)));
-        if (eMonthIdx !== -1 && Math.abs(currentMonthIdx - eMonthIdx) % 3 === 0) {
-          shouldShow = true;
-        }
-      } else {
-        const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0,3)));
-        if (eMonthIdx === currentMonthIdx) {
-          shouldShow = true;
-        }
-      }
-
-      if (shouldShow) {
+      const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0, 3)));
+      if (eMonthIdx === currentMonthIdx) {
         total++;
+        const freq = event.frequency?.toLowerCase() || "monthly";
         if (freq === "monthly") monthly++;
         if (freq === "quarterly") quarterly++;
-        if (freq === "annually") annually++;
+        if (freq === "annually" || freq === "yearly") annually++;
       }
     });
     return { total, monthly, quarterly, annually };
@@ -90,83 +78,65 @@ export default function CalendarPage() {
     const currentMonthIdx = currentDate.getMonth();
 
     data.forEach((event: any) => {
-      const freq = event.frequency?.toLowerCase() || "monthly";
-      let shouldShow = false;
-
-      if (freq === "monthly") {
-        shouldShow = true;
-      } else if (freq === "quarterly") {
-        const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0,3)));
-        if (eMonthIdx !== -1 && Math.abs(currentMonthIdx - eMonthIdx) % 3 === 0) {
-          shouldShow = true;
-        }
-      } else {
-        const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0,3)));
-        if (eMonthIdx === currentMonthIdx) {
-          shouldShow = true;
-        }
-      }
-
-      if (shouldShow) {
+      const eMonthIdx = MONTHS.findIndex(m => event.month?.startsWith(m.slice(0, 3)));
+      if (eMonthIdx === currentMonthIdx) {
+        const freq = event.frequency?.toLowerCase() || "monthly";
         // Apply filters
         if (freq === "monthly" && !filters.monthly) return;
         if (freq === "quarterly" && !filters.quarterly) return;
-        if (freq === "annually" && !filters.annually) return;
+        if ((freq === "annually" || freq === "yearly") && !filters.annually) return;
 
-        const d = parseInt(event.date, 10);
+        let d = parseInt(event.date, 10);
+        if (isNaN(d) || d === 0) d = daysInMonth; // default to last day if 0
         if (!map.has(d)) map.set(d, []);
         map.get(d)?.push(event);
       }
     });
     return map;
-  }, [data, currentDate, filters]);
+  }, [data, currentDate, filters, daysInMonth]);
 
   // Upcoming Events (next 5 events this month onwards)
   const upcomingEvents = React.useMemo(() => {
     if (!data) return [];
     const today = new Date();
-    
-    // Expand events based on frequency to correctly sort them
-    const expandedEvents: any[] = [];
+    const upcomingList: any[] = [];
 
     data.forEach((e: any) => {
-      const freq = e.frequency?.toLowerCase() || "monthly";
-      const eMonthIdx = MONTHS.findIndex(m => e.month?.startsWith(m.slice(0,3)));
-      const baseMonthIdx = eMonthIdx === -1 ? 0 : eMonthIdx;
+      const eMonthIdx = MONTHS.findIndex(m => e.month?.startsWith(m.slice(0, 3)));
+      if (eMonthIdx === -1) return;
 
-      // Check next 12 months for this event
-      for (let offset = 0; offset < 12; offset++) {
-        const checkMonthIdx = (today.getMonth() + offset) % 12;
-        const checkYear = today.getFullYear() + Math.floor((today.getMonth() + offset) / 12);
-        
-        let shouldInclude = false;
-        if (freq === "monthly") {
-          shouldInclude = true;
-        } else if (freq === "quarterly") {
-          if (Math.abs(checkMonthIdx - baseMonthIdx) % 3 === 0) shouldInclude = true;
-        } else {
-          if (checkMonthIdx === baseMonthIdx) shouldInclude = true;
-        }
+      // Calculate how many months from today
+      let offset = eMonthIdx - today.getMonth();
+      if (offset < 0) offset += 12; // Next year
 
-        if (shouldInclude) {
-          // If it's the current month, only include if date >= today
-          if (checkMonthIdx === today.getMonth() && checkYear === today.getFullYear()) {
-            if (parseInt(e.date, 10) >= today.getDate()) {
-              expandedEvents.push({ ...e, targetMonthIdx: checkMonthIdx, targetYear: checkYear, sortKey: offset * 100 + parseInt(e.date, 10) });
-            }
-          } else {
-            expandedEvents.push({ ...e, targetMonthIdx: checkMonthIdx, targetYear: checkYear, sortKey: offset * 100 + parseInt(e.date, 10) });
-          }
-        }
+      let d = parseInt(e.date, 10);
+      if (isNaN(d) || d === 0) {
+        const targetYear = today.getFullYear() + (eMonthIdx < today.getMonth() ? 1 : 0);
+        d = new Date(targetYear, eMonthIdx + 1, 0).getDate();
       }
+
+      // If it's the current month but date has passed, it belongs to NEXT year
+      if (offset === 0 && d < today.getDate()) {
+        offset = 12;
+      }
+
+      const targetYear = today.getFullYear() + Math.floor((today.getMonth() + offset) / 12);
+
+      upcomingList.push({
+        ...e,
+        date: d,
+        targetMonthIdx: eMonthIdx,
+        targetYear: targetYear,
+        sortKey: targetYear * 10000 + eMonthIdx * 100 + d
+      });
     });
 
-    expandedEvents.sort((a, b) => a.sortKey - b.sortKey);
-    
-    // Format the display month for the expanded events
-    return expandedEvents.slice(0, 5).map(e => ({
+    upcomingList.sort((a, b) => a.sortKey - b.sortKey);
+
+    // Format the display month for the events
+    return upcomingList.slice(0, 5).map(e => ({
       ...e,
-      month: MONTHS[e.targetMonthIdx].slice(0,3)
+      month: MONTHS[e.targetMonthIdx].slice(0, 3)
     }));
   }, [data]);
 
@@ -182,7 +152,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col">
+    <div className="space-y-6 fluid-container h-full flex flex-col">
       <PageHeader
         title="Compliance Calendar"
         description="Track and manage statutory compliance due dates."
@@ -250,8 +220,9 @@ export default function CalendarPage() {
           {/* Days Header */}
           <div className="grid grid-cols-7 border-b bg-muted/20">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-              <div key={day} className="py-3 text-center text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                {day}
+              <div key={day} className="py-2 md:py-3 text-center text-[10px] md:text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <span className="hidden md:inline">{day}</span>
+                <span className="md:hidden">{day.charAt(0)}</span>
               </div>
             ))}
           </div>
@@ -259,7 +230,7 @@ export default function CalendarPage() {
           {/* Grid */}
           <div className="grid grid-cols-7 flex-1 auto-rows-fr bg-border gap-px">
             {blanks.map(b => (
-              <div key={`b-${b}`} className="bg-card/50 min-h-[140px]" />
+              <div key={`b-${b}`} className="bg-card/50 min-h-[60px] md:min-h-[140px]" />
             ))}
 
             {days.map(day => {
@@ -268,31 +239,48 @@ export default function CalendarPage() {
                 currentDate.getFullYear() === new Date().getFullYear();
 
               const events = eventsByDay.get(day) || [];
+              console.log("events", events)
+
+              const isSelected = selectedDay === day;
 
               return (
                 <div
                   key={day}
+                  onClick={() => setSelectedDay(day)}
                   className={cn(
-                    "bg-card min-h-[140px] p-2 flex flex-col transition-all hover:bg-muted/30 group relative",
-                    isToday && "bg-primary/5 ring-1 ring-inset ring-primary/20"
+                    "bg-card min-h-[60px] md:min-h-[140px] p-1 md:p-2 flex flex-col transition-all hover:bg-muted/30 group relative cursor-pointer md:cursor-default",
+                    isToday && "bg-primary/5 ring-1 ring-inset ring-primary/20",
+                    isSelected && "ring-2 ring-inset ring-primary/50 md:ring-0 md:ring-transparent"
                   )}
                 >
-                  <div className="flex justify-between items-start mb-1.5">
+                  <div className="flex justify-center md:justify-between items-start mb-1 md:mb-1.5">
                     <span className={cn(
                       "inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-semibold transition-colors",
-                      isToday ? "bg-primary text-primary-foreground shadow-md" : "text-foreground/80 group-hover:text-primary group-hover:bg-primary/10"
+                      isToday ? "bg-primary text-primary-foreground shadow-md" :
+                        isSelected ? "bg-primary/20 text-primary md:bg-transparent md:text-foreground/80" :
+                          "text-foreground/80 group-hover:text-primary group-hover:bg-primary/10"
                     )}>
                       {day}
                     </span>
                     {events.length > 0 && (
-                      <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                      <span className="hidden md:inline-flex text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                         {events.length} due
                       </span>
                     )}
                   </div>
 
-                  {/* Scrollable Event List */}
-                  <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 custom-scrollbar pb-2 max-h-[120px]">
+                  {/* Mobile Event Dots */}
+                  {events.length > 0 && (
+                    <div className="flex md:hidden flex-wrap gap-0.5 justify-center mt-auto pb-1">
+                      {events.slice(0, 3).map((e: any, i: number) => (
+                        <div key={i} className={cn("h-1.5 w-1.5 rounded-full", getEventStyle(e.frequency).dot)} />
+                      ))}
+                      {events.length > 3 && <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />}
+                    </div>
+                  )}
+
+                  {/* Scrollable Event List (Desktop) */}
+                  <div className="hidden md:flex flex-1 overflow-y-auto pr-1 flex-col space-y-1.5 custom-scrollbar pb-2 max-h-[120px]">
                     {events.map((e: any, i: number) => {
                       const style = getEventStyle(e.frequency);
                       return (
@@ -319,12 +307,12 @@ export default function CalendarPage() {
                                 <span className="text-muted-foreground">Due Date</span>
                                 <span className="font-bold text-foreground">{e.date} {e.month}</span>
                               </div>
-                              <div className="flex justify-between items-center py-1">
+                              {/* <div className="flex justify-between items-center py-1">
                                 <span className="text-muted-foreground">Customer</span>
                                 <span className="font-medium">{e.customer || "N/A"}</span>
-                              </div>
+                              </div> */}
                               <div className="pt-2">
-                                <Button size="sm" className="w-full rounded-lg shadow-sm"
+                                <Button size="sm" className="w-full rounded-lg shadow-sm !bg-primary"
                                   onClick={() => window.location.href = getRecordRoute("Item", e.item)}
                                 >View Details</Button>
                               </div>
@@ -337,6 +325,49 @@ export default function CalendarPage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Mobile Selected Day Events Panel */}
+          <div className="block md:hidden border-t bg-muted/10 p-4">
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+              {selectedDay} {currentMonthStr} {currentYear}
+              {eventsByDay.get(selectedDay || 0)?.length ? (
+                <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                  {eventsByDay.get(selectedDay || 0)?.length} Events
+                </span>
+              ) : null}
+            </h3>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+              {eventsByDay.get(selectedDay || 0)?.length ? (
+                eventsByDay.get(selectedDay || 0)?.map((e: any, idx: number) => {
+                  const style = getEventStyle(e.frequency);
+                  return (
+                    <div key={idx} className="flex flex-col p-3 rounded-xl border bg-card shadow-sm active:scale-[0.98] transition-transform cursor-pointer"
+                      onClick={() => window.location.href = getRecordRoute("Item", e.item)}>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          <div className={cn("h-2 w-2 rounded-full shrink-0", style.dot)} />
+                          <span className="font-semibold text-sm leading-tight">{e.item}</span>
+                        </div>
+                      </div>
+                      <div className="mt-2.5 flex items-center justify-between text-xs text-muted-foreground">
+                        <span className={cn("px-2 py-0.5 rounded-md font-medium", style.bg, style.text)}>
+                          {e.frequency}
+                        </span>
+                        {e.customer && <span className="truncate max-w-[120px]">For: {e.customer}</span>}
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="py-8 flex flex-col items-center text-center text-muted-foreground bg-card rounded-xl border border-dashed">
+                  <CalendarIcon className="h-8 w-8 mb-2 opacity-20" />
+                  <p className="text-sm font-medium">No events planned</p>
+                  <p className="text-xs opacity-70 mt-1">Select a different date</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -437,11 +468,11 @@ export default function CalendarPage() {
               )}
             </div>
 
-            <div className="p-3 border-t bg-muted/10 mt-auto">
+            {/* <div className="p-3 border-t bg-muted/10 mt-auto">
               <Button variant="outline" className="w-full text-xs font-bold" size="sm" onClick={() => window.location.href = "/cadesk365/client-service/view"}>
                 View All Schedule
               </Button>
-            </div>
+            </div> */}
           </div>
 
         </div>

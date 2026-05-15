@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getDoctypeMeta } from "@/lib/api/doctype";
 import type { BaseRendererProps } from "../engine.types";
 import { FieldRenderer } from "../field-renderer";
+import { useFetchFrom } from "../hooks/use-fetch-from";
 
 export function RenderTable({ field, value, onChange, isReadOnly, labelNode, formData }: BaseRendererProps) {
   const childDoctype = field.options;
@@ -15,6 +16,8 @@ export function RenderTable({ field, value, onChange, isReadOnly, labelNode, for
     queryFn: () => getDoctypeMeta(childDoctype!),
     enabled: !!childDoctype,
   });
+
+  const { handleFetchFrom } = useFetchFrom(meta?.fields || []);
 
   const rows: any[] = Array.isArray(value) ? value : [];
 
@@ -38,9 +41,18 @@ export function RenderTable({ field, value, onChange, isReadOnly, labelNode, for
 
   const handleCellChange = (index: number, fieldname: string, val: any) => {
     if (isReadOnly) return;
+    
+    // Initial change
     const newRows = [...rows];
     newRows[index] = { ...newRows[index], [fieldname]: val };
     onChange(newRows);
+
+    // Handle fetch_from
+    handleFetchFrom(fieldname, val, (updates) => {
+      const updatedRows = [...newRows];
+      updatedRows[index] = { ...updatedRows[index], ...updates };
+      onChange(updatedRows);
+    });
   };
 
   if (isLoading) {

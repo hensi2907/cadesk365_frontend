@@ -43,7 +43,7 @@ function AttendanceGridCard({ record, onClick }: { record: AttendanceRecord, onC
   return (
     <div
       onClick={onClick}
-      className="flex cursor-pointer flex-col gap-[6px] rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+      className="fluid container flex cursor-pointer flex-col gap-[6px] rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
     >
       <p className="text-[13px] font-bold">{dateStr}</p>
       <div>
@@ -106,7 +106,7 @@ export default function AttendancePage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="auto-grid auto-grid-xs">
         <KpiCard title="Present" value={data?.present || 0} valueClass="text-emerald-600 dark:text-emerald-500" isLoading={isLoading} />
         <KpiCard title="Absent" value={data?.absent || 0} valueClass="text-rose-600 dark:text-rose-500" isLoading={isLoading} />
         <KpiCard title="WFH" value={data?.work_from_home || 0} valueClass="text-teal-600 dark:text-teal-500" isLoading={isLoading} />
@@ -123,18 +123,19 @@ export default function AttendancePage() {
           </div>
           <div className="p-5">
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="auto-grid auto-grid-sm">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <Skeleton key={i} className="h[100px] w-full rounded-2xl" />
                 ))}
               </div>
             ) : records.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="auto-grid auto-grid-sm">
                 {records.map((record, i) => (
                   <AttendanceGridCard
                     key={i}
                     record={record}
                     onClick={() => router.push(`/cadesk365/attendance/${record.name}`)}
+
                   />
                 ))}
               </div>

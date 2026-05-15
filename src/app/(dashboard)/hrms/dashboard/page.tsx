@@ -54,7 +54,7 @@ export default function HRDashboard() {
         description="Monitor workforce analytics, manage approvals, and streamline HR operations."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="auto-grid auto-grid-md">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.title}
@@ -99,8 +99,8 @@ export default function HRDashboard() {
             <CardContent>
               <DataTable
                 columns={[
-                  { 
-                    accessorKey: "employee", 
+                  {
+                    accessorKey: "employee",
                     header: "Employee",
                     cell: ({ row }: any) => {
                       const empName = row.getValue("employee") || "Unknown";
@@ -114,8 +114,8 @@ export default function HRDashboard() {
                       )
                     }
                   },
-                  { 
-                    accessorKey: "doctype", 
+                  {
+                    accessorKey: "doctype",
                     header: "Request Type",
                     cell: ({ row }: any) => (
                       <div className="flex flex-col">
@@ -126,8 +126,8 @@ export default function HRDashboard() {
                   },
                   { accessorKey: "department", header: "Department" },
                   { accessorKey: "dates", header: "Date / Period" },
-                  { 
-                    accessorKey: "status", 
+                  {
+                    accessorKey: "status",
                     header: "Status",
                     cell: ({ row }: any) => {
                       const status = row.getValue("status");
@@ -142,12 +142,12 @@ export default function HRDashboard() {
                       )
                     }
                   },
-                  { 
-                    id: "action", 
-                    header: "", 
+                  {
+                    id: "action",
+                    header: "",
                     cell: ({ row }: any) => (
                       <Link href={getRecordRoute(row.original.doctype, row.original.name)}>
-                        <Button size="sm" className="h-8 bg-primary/50 hover:bg-primary text-white font-bold rounded-lg shadow-sm hover:shadow-md transition-all">View</Button> 
+                        <Button size="sm" className="h-8 bg-primary/50 hover:bg-primary text-white font-bold rounded-lg shadow-sm hover:shadow-md transition-all">View</Button>
                       </Link>
                     )
                   }
@@ -186,29 +186,31 @@ export default function HRDashboard() {
             <CardHeader>
               <CardTitle className="text-lg font-bold">HR Insights</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <Briefcase className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">New Hires this month</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {dashboardData?.insights?.new_hires || 0} new employees joined the firm this month.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0">
-                  <Clock className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">Real-time Metrics</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Your HR Dashboard is now connected to live data from Frappe. Metrics update in real-time.
-                  </p>
-                </div>
-              </div>
+            <CardContent className="space-y-4 max-h-[400px] overflow-y-auto">
+              {Array.isArray(dashboardData?.insights) && dashboardData.insights.length > 0 ? (
+                dashboardData.insights.map((insight: { type: string; title: string; message: string }, i: number) => {
+                  const colorMap: Record<string, { bg: string; text: string; icon: typeof Briefcase }> = {
+                    positive: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", icon: UserCheck },
+                    warning: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", icon: Clock },
+                    info: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", icon: Briefcase },
+                  };
+                  const style = colorMap[insight.type] || colorMap.info;
+                  const IconComp = style.icon;
+                  return (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0", style.bg, style.text)}>
+                        <IconComp className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold leading-tight">{insight.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 break-words">{insight.message}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground">No insights available.</p>
+              )}
             </CardContent>
           </Card>
         </div>

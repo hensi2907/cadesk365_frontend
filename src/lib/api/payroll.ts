@@ -113,3 +113,16 @@ export async function getEmployeePayrollDetails(
   );
   return response;
 }
+
+export interface PayrollFiltersDataResponse {
+  departments: string[];
+  statuses: string[];
+}
+
+export async function getPayrollFiltersData(): Promise<PayrollFiltersDataResponse> {
+  const response = await callMethod<PayrollFiltersDataResponse>(
+    "cadesk365.api.payroll_summary.get_payroll_filters_data",
+    {}
+  );
+  return response;
+}

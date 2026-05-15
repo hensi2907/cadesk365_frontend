@@ -106,9 +106,9 @@ function DroppableCell({ employeeId, dateStr, isWeekend, specialStatus, children
 
   let bgClass = 'bg-transparent';
   let textClass = '';
-  
+
   if (isOver) {
-    bgClass = 'bg-teal-500/10';
+    bgClass = 'bg-blue-500/10';
   } else if (specialStatus) {
     if (specialStatus.type === 'weekly_off') {
       bgClass = 'bg-slate-50 dark:bg-slate-900/40';
@@ -130,17 +130,17 @@ function DroppableCell({ employeeId, dateStr, isWeekend, specialStatus, children
       className={`border-b border-r border-border/50 align-top h-[80px] min-w-[140px] relative transition-colors ${bgClass}`}
     >
       {specialStatus ? (
-         <div className={`w-full h-full min-h-[80px] flex items-center justify-center text-[11px] uppercase ${textClass}`}>
-             {specialStatus.label}
-         </div>
+        <div className={`w-full h-full min-h-[80px] flex items-center justify-center text-[11px] uppercase ${textClass}`}>
+          {specialStatus.label}
+        </div>
       ) : (
-         <div className="p-2 h-full w-full">
-            {children ? children : (
-              <div className={`min-h-[64px] h-full w-full rounded-md border border-dashed transition-colors flex items-center justify-center ${isOver ? 'border-teal-500/50' : 'border-transparent hover:border-border/60 hover:bg-muted/30 group/cell'}`}>
-                {!isOver && <Plus className="w-4 h-4 text-muted-foreground opacity-0 group-hover/cell:opacity-100 transition-opacity" />}
-              </div>
-            )}
-         </div>
+        <div className="p-2 h-full w-full">
+          {children ? children : (
+            <div className={`min-h-[64px] h-full w-full rounded-md border border-dashed transition-colors flex items-center justify-center ${isOver ? 'border-blue-500/50' : 'border-transparent hover:border-border/60 hover:bg-muted/30 group/cell'}`}>
+              {!isOver && <Plus className="w-4 h-4 text-muted-foreground opacity-0 group-hover/cell:opacity-100 transition-opacity" />}
+            </div>
+          )}
+        </div>
       )}
     </td>
   );
@@ -225,12 +225,15 @@ export default function HRRosterPage() {
 
       const emp = employeeMap.get(record.employee)!;
       // If it's a valid assignment, map it to days
-      if (record.name && record.start_date && record.end_date) {
+      if (record.name && record.start_date) {
         daysInView.forEach(day => {
           const dayStr = format(day, 'yyyy-MM-dd');
           const checkDay = new Date(dayStr).getTime();
           const checkStart = new Date(record.start_date).getTime();
-          const checkEnd = new Date(record.end_date).getTime();
+
+          // If end_date is null/empty or "None", treat it as open-ended (Infinity)
+          const isValidEndDate = record.end_date && record.end_date !== "None" && record.end_date !== "";
+          const checkEnd = isValidEndDate ? new Date(record.end_date).getTime() : Infinity;
 
           if (checkDay >= checkStart && checkDay <= checkEnd) {
             if (!emp.shifts.has(dayStr)) {
@@ -326,8 +329,8 @@ export default function HRRosterPage() {
 
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border/50 pb-4">
-          <div className="p-2 bg-teal-500/10 dark:bg-teal-500/20 rounded-lg">
-            <CalendarDays className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+          <div className="p-2 bg-blue-500/10 dark:bg-blue-500/20 rounded-lg">
+            <CalendarDays className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground/90 flex items-center gap-2">
             Roster: Month View
@@ -353,7 +356,7 @@ export default function HRRosterPage() {
             <div className="w-[180px]">
               <Input
                 placeholder="Department"
-                className="h-9 bg-card/60 backdrop-blur-xl border-border/50 focus-visible:ring-teal-500/30 text-sm"
+                className="h-9 bg-card/60 backdrop-blur-xl border-border/50 focus-visible:ring-blue-500/30 text-sm"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
               />
@@ -385,7 +388,7 @@ export default function HRRosterPage() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              className="h-9 bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+              className="h-9 bg-blue-600/80 hover:bg-blue-700 text-white shadow-sm"
               onClick={() => setIsModalOpen(true)}
             >
               <Plus className="w-4 h-4 mr-1.5" />
@@ -439,8 +442,8 @@ export default function HRRosterPage() {
                   <tr>
                     <td colSpan={daysInView.length + 1} className="h-48 text-center">
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="p-3 bg-teal-500/10 rounded-full">
-                          <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+                        <div className="p-3 bg-blue-500/10 rounded-full">
+                          <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
                         </div>
                         <span className="font-medium text-muted-foreground">Loading roster data...</span>
                       </div>
@@ -483,14 +486,14 @@ export default function HRRosterPage() {
                         let shiftRecord = null;
 
                         if (records.length > 0) {
-                            const leave = records.find(r => r.is_leave);
-                            const holiday = records.find(r => r.is_holiday && !r.weekly_off);
-                            const wo = records.find(r => r.weekly_off);
-                            shiftRecord = records.find(r => !r.is_leave && !r.is_holiday && !r.weekly_off);
+                          const leave = records.find(r => r.is_leave);
+                          const holiday = records.find(r => r.is_holiday && !r.weekly_off);
+                          const wo = records.find(r => r.weekly_off);
+                          shiftRecord = records.find(r => !r.is_leave && !r.is_holiday && !r.weekly_off);
 
-                            if (leave) specialStatus = { type: 'leave', label: leave.shift_type };
-                            else if (holiday) specialStatus = { type: 'holiday', label: "Holiday" };
-                            else if (wo) specialStatus = { type: 'weekly_off', label: "WO" };
+                          if (leave) specialStatus = { type: 'leave', label: leave.shift_type };
+                          else if (holiday) specialStatus = { type: 'holiday', label: "Holiday" };
+                          else if (wo) specialStatus = { type: 'weekly_off', label: "WO" };
                         }
 
                         return (

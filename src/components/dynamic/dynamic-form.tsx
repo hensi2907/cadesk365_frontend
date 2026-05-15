@@ -3,14 +3,16 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Save, ArrowLeft, Loader2, Send, CheckCircle2, Printer } from "lucide-react";
+import { Save, ArrowLeft, Loader2, Send, CheckCircle2, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { saveDoctypeRecord, insertDoctypeRecord, submitDoctypeRecord, getPrintFormats } from "@/lib/api/doctype";
+import { saveDoctypeRecord, insertDoctypeRecord, submitDoctypeRecord, getPrintFormats, deleteDoctypeRecord } from "@/lib/api/doctype";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getRecordRoute } from "@/lib/utils/route";
 import { FieldRenderer } from "./engine/field-renderer";
+import { useFetchFrom } from "./engine/hooks/use-fetch-from";
 import type { DocType, DocField } from "@/types/frappe";
 import type { DocTypePermissions } from "@/lib/api/permissions";
 
@@ -27,6 +29,8 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
   const [formData, setFormData] = React.useState<any>(initialData || {});
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
 
+  const { handleFetchFrom } = useFetchFrom(doctypeMeta.fields);
+
   // Document states
   const docstatus = formData.docstatus || 0;
   const isDraft = docstatus === 0;
@@ -37,6 +41,8 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
   const isReadOnly = (!permissions.write && !isNew) || isSubmitted || isCancelled;
   const canSubmit = doctypeMeta.is_submittable === 1 && permissions.submit && !isNew && isDraft;
   const canPrint = permissions.print && !isNew;
+  const canDelete = permissions.delete && !isNew;
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData || {});
 
   const [printFormat, setPrintFormat] = React.useState<string>("Standard");
   const [isPrintDialogOpen, setIsPrintDialogOpen] = React.useState(false);
@@ -67,6 +73,12 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
 
   const handleChange = React.useCallback((fieldname: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [fieldname]: value }));
+    
+    // Handle fetch_from
+    handleFetchFrom(fieldname, value, (updates) => {
+      setFormData((prev: any) => ({ ...prev, ...updates }));
+    });
+
     // Clear error for the field when it is changed
     setFormErrors((prev) => {
       if (prev[fieldname]) {
@@ -76,7 +88,7 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
       }
       return prev;
     });
-  }, []);
+  }, [handleFetchFrom]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
@@ -107,15 +119,23 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
     mutationFn: async (data: any) => {
       const isSingle = doctypeMeta.issingle === 1;
 
+      // Filter out empty data for new records
+      let payload = { ...data };
+      if (isNew) {
+        payload = Object.fromEntries(
+          Object.entries(payload).filter(([_, v]) => v !== "" && v !== null && v !== undefined)
+        );
+      }
+
       if (isSingle) {
         // Single DocTypes are always updated. Their name is exactly their DocType name.
-        return saveDoctypeRecord({ doctype: doctypeMeta.name, name: doctypeMeta.name, ...data });
+        return saveDoctypeRecord({ doctype: doctypeMeta.name, name: doctypeMeta.name, ...payload });
       }
 
       if (isNew) {
-        return insertDoctypeRecord({ doctype: doctypeMeta.name, ...data });
+        return insertDoctypeRecord({ doctype: doctypeMeta.name, ...payload });
       } else {
-        return saveDoctypeRecord({ doctype: doctypeMeta.name, name: data.name, ...data });
+        return saveDoctypeRecord({ doctype: doctypeMeta.name, name: payload.name, ...payload });
       }
     },
     onSuccess: (res: any) => {
@@ -193,6 +213,20 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return deleteDoctypeRecord(doctypeMeta.name, formData.name);
+    },
+    onSuccess: () => {
+      import("sonner").then((mod) => mod.toast.success(`${doctypeMeta.name} deleted successfully`));
+      queryClient.invalidateQueries({ queryKey: ["doctype-list", doctypeMeta.name] });
+      router.replace(getRecordRoute(doctypeMeta.name, ""));
+    },
+    onError: (err: any) => {
+      import("sonner").then((mod) => mod.toast.error("Delete Error", { description: err?.message || "Failed to delete document" }));
+    }
+  });
+
   // Group fields logically by Section Break
   const sections = React.useMemo(() => {
     const _sections: { title: string; fields: DocField[] }[] = [];
@@ -220,7 +254,7 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
   }, [doctypeMeta.fields]);
 
   return (
-    <div className="space-y-8 max-w-[1200px] mx-auto pb-16">
+    <div className="space-y-8 fluid-container pb-16">
 
       <div className="flex items-center justify-between gap-4 sticky top-0 bg-transaparent z-30 py-4 transition-all px-2">
         <div className="flex items-center gap-4">
@@ -233,9 +267,19 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
           />
           {!isNew && (
             <div className="ml-3 mt-1 flex gap-2">
-              {isDraft && <span className="inline-flex items-center rounded-full bg-red-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-500 border border-red-500/20 backdrop-blur-md shadow-sm">Draft</span>}
-              {isSubmitted && <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-500 border border-emerald-500/20 backdrop-blur-md shadow-sm">Submitted</span>}
-              {isCancelled && <span className="inline-flex items-center rounded-full bg-slate-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 border border-slate-500/20 backdrop-blur-md shadow-sm">Cancelled</span>}
+              {doctypeMeta.is_submittable === 1 ? (
+                <>
+                  {isDraft && <span className="inline-flex items-center rounded-full bg-red-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-500 border border-red-500/20 backdrop-blur-md shadow-sm">Draft</span>}
+                  {isSubmitted && <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-500 border border-emerald-500/20 backdrop-blur-md shadow-sm">Submitted</span>}
+                  {isCancelled && <span className="inline-flex items-center rounded-full bg-slate-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-500 border border-slate-500/20 backdrop-blur-md shadow-sm">Cancelled</span>}
+                </>
+              ) : (
+                isDirty ? (
+                  <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-500 border border-amber-500/20 backdrop-blur-md shadow-sm">Not Saved</span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-500 border border-emerald-500/20 backdrop-blur-md shadow-sm">Saved</span>
+                )
+              )}
             </div>
           )}
         </div>
@@ -300,11 +344,9 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
 
           {canPrint && (
             <Dialog open={isPrintDialogOpen} onOpenChange={setIsPrintDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="rounded-full px-4 border-border/50 hover:bg-accent/50 transition-all font-semibold">
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
-                </Button>
+              <DialogTrigger render={<Button variant="outline" className="rounded-full px-4 border-border/50 hover:bg-accent/50 transition-all font-semibold" />}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -354,6 +396,33 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
               </DialogContent>
             </Dialog>
           )}
+
+          {canDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger render={<Button variant="outline" className="rounded-full px-4 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/40 transition-all font-semibold shadow-sm" />}>
+                {deleteMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin text-red-500" />
+                ) : (
+                  <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+                )}
+                <span className="text-red-500">Delete</span>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the {doctypeMeta.name} record <strong>{formData.name}</strong> from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteMutation.mutate()} className="bg-red-600 hover:bg-red-700 text-white focus:ring-red-600">
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
 
@@ -368,7 +437,7 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
                 {section.title}
               </h3>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="auto-grid auto-grid-lg">
               {section.fields.map((field) => (
                 <div
                   key={field.fieldname}
@@ -376,7 +445,7 @@ export function DynamicForm({ doctypeMeta, permissions, initialData, isNew = fal
                     field.fieldtype === "Text Editor" ||
                       field.fieldtype === "Table" ||
                       field.fieldtype === "Long Text"
-                      ? "md:col-span-2 lg:col-span-3"
+                      ? "col-span-full"
                       : ""
                   }
                 >

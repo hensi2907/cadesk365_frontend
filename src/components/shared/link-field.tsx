@@ -8,7 +8,10 @@ import { searchLink } from "@/lib/api/client";
 import { getDoctypeMeta } from "@/lib/api/doctype";
 import { resolveDocumentTitle } from "@/lib/utils/title-resolver";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
+import { getAllUserPermissions } from "@/lib/api/permissions";
+import { getNewRecordRoute } from "@/lib/utils/route";
+import { useRouter } from "next/navigation";
 
 interface LinkFieldProps {
   doctype: string;
@@ -41,12 +44,20 @@ export function LinkField({
 
   const titleField = meta?.title_field && meta.title_field !== "name" ? meta.title_field : null;
 
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
   const [displayValue, setDisplayValue] = React.useState("");
   const [options, setOptions] = React.useState<any[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [rect, setRect] = React.useState<DOMRect | null>(null);
+
+  const { data: permissions } = useQuery({
+    queryKey: ["permissions", doctype],
+    queryFn: () => getAllUserPermissions(doctype),
+    enabled: !!doctype && isOpen,
+    staleTime: 1000 * 60 * 5,
+  });
 
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -201,6 +212,22 @@ export function LinkField({
                 </div>
               );
             })
+          )}
+
+          {permissions?.create && (
+            <div
+              className="mt-1 border-t pt-1 sticky bottom-0 bg-popover"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(getNewRecordRoute(doctype));
+                setIsOpen(false);
+              }}
+            >
+              <div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10 hover:text-primary transition-colors">
+                <Plus className="mr-2 h-3.5 w-3.5" />
+                Add New {doctype}
+              </div>
+            </div>
           )}
         </div>,
         document.body

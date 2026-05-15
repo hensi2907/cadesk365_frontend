@@ -52,38 +52,43 @@
   --radius: 0.6rem;
   --background: #f8fafc;
   --foreground: #0f172a;
-  
+
   --card: #ffffff;
   --card-foreground: #0f172a;
-  
+
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  
-  --primary: #1e3a8a; /* Dark Blue */
+
+  --primary: #1e3a8a;
+  /* Dark Blue */
   --primary-foreground: #ffffff;
-  
-  --secondary: #0d9488; /* Teal */
+
+  --secondary: #0d9488;
+  /* Teal */
   --secondary-foreground: #ffffff;
-  
+
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  
-  --accent: #eff6ff; /* Light blue for active states */
-  --accent-foreground: #1e3a8a; /* Dark blue text */
-  
+
+  --accent: #eff6ff;
+  /* Light blue for active states */
+  --accent-foreground: #1e3a8a;
+  /* Dark blue text */
+
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  
+
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #1e3a8a; /* Dark blue focus rings */
-  
+  --ring: #1e3a8a;
+  /* Dark blue focus rings */
+
   --chart-1: #1e3a8a;
   --chart-2: #0d9488;
   --chart-3: #f59e0b;
   --chart-4: #ec4899;
   --chart-5: #8b5cf6;
-  
+
   --sidebar: #ffffff;
   --sidebar-foreground: #0f172a;
   --sidebar-primary: #1e3a8a;
@@ -98,38 +103,44 @@
 .dark {
   --background: #020617;
   --foreground: #f8fafc;
-  
-  --card: #090e1a; /* Deeper slate/blue for cards */
+
+  --card: #090e1a;
+  /* Deeper slate/blue for cards */
   --card-foreground: #f8fafc;
-  
+
   --popover: #090e1a;
   --popover-foreground: #f8fafc;
-  
-  --primary: #3b82f6; /* Brighter blue for dark mode visibility */
+
+  --primary: #3b82f6;
+  /* Brighter blue for dark mode visibility */
   --primary-foreground: #ffffff;
-  
-  --secondary: #2dd4bf; /* Teal 400 */
+
+  --secondary: #2dd4bf;
+  /* Teal 400 */
   --secondary-foreground: #020617;
-  
+
   --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  
-  --accent: #172554; /* Very dark blue for hover/active */
-  --accent-foreground: #bfdbfe; /* Light blue text */
-  
+
+  --accent: #172554;
+  /* Very dark blue for hover/active */
+  --accent-foreground: #bfdbfe;
+  /* Light blue text */
+
   --destructive: #f87171;
   --destructive-foreground: #020617;
-  
+
   --border: #1e293b;
   --input: #1e293b;
-  --ring: #3b82f6; /* Blue focus rings */
-  
+  --ring: #3b82f6;
+  /* Blue focus rings */
+
   --chart-1: #3b82f6;
   --chart-2: #2dd4bf;
   --chart-3: #fbbf24;
   --chart-4: #f472b6;
   --chart-5: #a78bfa;
-  
+
   --sidebar: #020617;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #3b82f6;
@@ -138,6 +149,56 @@
   --sidebar-accent-foreground: #bfdbfe;
   --sidebar-border: #1e293b;
   --sidebar-ring: #3b82f6;
+}
+
+/* ═══════════════════════════════════════
+   Fluid Responsive System
+   Scales continuously — no breakpoint jumps
+   ═══════════════════════════════════════ */
+
+:root {
+  /* Fluid spacing — scales smoothly across 768px → 2560px+ */
+  --space-page: clamp(1rem, 1.5vw + 0.5rem, 2.5rem);
+  --space-section: clamp(1rem, 1.2vw + 0.4rem, 2rem);
+  --space-card: clamp(0.75rem, 0.8vw + 0.3rem, 1.5rem);
+  --space-gap: clamp(0.75rem, 0.6vw + 0.4rem, 1.25rem);
+}
+
+@layer components {
+
+  /* Fluid container — replaces all max-w-6xl/7xl/[1400px] patterns */
+  .fluid-container {
+    width: 100%;
+    max-width: min(100%, 92vw);
+    margin-inline: auto;
+  }
+
+  /* Auto-reflowing grid — cards reflow naturally without breakpoints */
+  .auto-grid {
+    display: grid;
+    gap: var(--space-gap);
+  }
+
+  /* Named size variants — explicit minmax values */
+  .auto-grid-xs {
+    grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
+  }
+
+  .auto-grid-sm {
+    grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr));
+  }
+
+  .auto-grid-md {
+    grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  }
+
+  .auto-grid-lg {
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  }
+
+  .auto-grid-xl {
+    grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  }
 }
 
 /* ═══════════════════════════════════════
@@ -154,6 +215,22 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Fluid typography for large screens */
+  h1,
+  [class*="text-2xl"] {
+    font-size: clamp(1.5rem, 1.2vw + 0.8rem, 2.25rem);
+  }
+
+  h2,
+  [class*="text-xl"]:not([class*="text-2xl"]) {
+    font-size: clamp(1.25rem, 0.8vw + 0.7rem, 1.75rem);
+  }
+
+  h3,
+  [class*="text-lg"] {
+    font-size: clamp(1.125rem, 0.5vw + 0.8rem, 1.375rem);
   }
 
   /* Custom scrollbar */
@@ -242,11 +319,21 @@
 }
 
 @keyframes grid-drift {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(50px, 50px);
+  }
 }
 
 @keyframes shine-sweep {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }

@@ -56,9 +56,9 @@ export default function ClientCompliances() {
       id: "actions",
       header: "",
       cell: ({ row }) => (
-        <Button 
-          size="sm" 
-          variant="ghost" 
+        <Button
+          size="sm"
+          variant="ghost"
           className="text-primary hover:text-primary/90 hover:bg-primary/5"
           onClick={() => setSelectedTask(row.original)}
         >
@@ -69,7 +69,7 @@ export default function ClientCompliances() {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto flex gap-8">
+    <div className="p-8 fluid-container flex gap-8">
       <div className="flex-1 space-y-8 min-w-0">
         <div>
           <h1 className="text-3xl font-black tracking-tight">Compliance Tracking</h1>

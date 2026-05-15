@@ -240,7 +240,7 @@ export default function OnboardClientPage() {
 
   if (success) {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="space-y-6 fluid-container">
         <PageHeader title="Onboard New Client" />
         <div className="flex flex-col items-center justify-center p-12 space-y-6 rounded-xl border bg-card text-center shadow-sm">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20">
@@ -276,7 +276,7 @@ export default function OnboardClientPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 fluid-container">
       <PageHeader
         title="Onboard New Client"
         description="Create a new client profile and set up their initial compliance requirements."
@@ -307,7 +307,7 @@ export default function OnboardClientPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/90 dark:bg-primary/20 dark:text-primary/80 text-sm font-bold">1</span>
               Basic Information
             </h3>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="auto-grid auto-grid-lg">
               <div className="space-y-2">
                 <Label>Salutation</Label>
                 <LinkField doctype="Salutation" value={watch("salutation") || ""} onChange={v => setValue("salutation", v)} />
@@ -365,7 +365,7 @@ export default function OnboardClientPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/90 dark:bg-primary/20 dark:text-primary/80 text-sm font-bold">2</span>
               Address & Location
             </h3>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="auto-grid auto-grid-lg">
               <div className="space-y-2">
                 <Label htmlFor="customer_primary_contact" className={errors.customer_primary_contact ? "text-destructive" : ""}>Customer Primary Contact</Label>
                 <div className="flex gap-2">
@@ -401,11 +401,11 @@ export default function OnboardClientPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2 sm:col-span-2">
+              <div className="space-y-2 col-span-full">
                 <Label htmlFor="address_line1">Address Line 1</Label>
                 <Input id="address_line1" placeholder="Building, Street, Area" {...register("address_line1")} />
               </div>
-              <div className="space-y-2 sm:col-span-2">
+              <div className="space-y-2 col-span-full">
                 <Label htmlFor="address_line2">Address Line 2</Label>
                 <Input id="address_line2" placeholder="" {...register("address_line2")} />
               </div>
@@ -439,7 +439,7 @@ export default function OnboardClientPage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary/90 dark:bg-primary/20 dark:text-primary/80 text-sm font-bold">3</span>
               Contact & Compliance IDs
             </h3>
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="auto-grid auto-grid-lg">
               <div className="space-y-2">
                 <Label htmlFor="email_id" className={errors.email_id ? "text-destructive" : ""}>Email ID</Label>
                 <Input id="email_id" type="email" placeholder="contact@company.com" {...register("email_id")} className={errors.email_id ? "border-destructive" : ""} />

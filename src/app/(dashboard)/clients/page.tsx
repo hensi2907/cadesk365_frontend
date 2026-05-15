@@ -85,7 +85,7 @@ export default function ClientsPage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
+    <div className="space-y-5 fluid-container">
       <PageHeader title="Clients" description="Manage clients and view compliance status.">
         <Button onClick={() => router.push("/clients/onboard")} size="sm" className="gap-1.5 !bg-primary/90">
           <Plus className="h-3.5 w-3.5" />
@@ -94,7 +94,7 @@ export default function ClientsPage() {
       </PageHeader>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="auto-grid auto-grid-md">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)
         ) : (

@@ -103,7 +103,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-[600px] bg-card/95 backdrop-blur-xl border-border/50">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-teal-500/10 rounded-xl text-teal-600">
+            <div className="p-2 bg-blue-500/10 rounded-xl text-blue-600">
               <CalendarDays className="w-6 h-6" />
             </div>
             <div>
@@ -120,7 +120,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
             <div className="space-y-2">
               <Label className="text-sm font-medium">Shift Type <span className="text-destructive">*</span></Label>
               <Select value={shiftType} onValueChange={setShiftType}>
-                <SelectTrigger className="bg-background/50 border-border/50 focus:ring-teal-500/30">
+                <SelectTrigger className="bg-background/50 border-border/50 focus:ring-blue-500/30">
                   <SelectValue placeholder="Select a shift" />
                 </SelectTrigger>
                 <SelectContent>
@@ -137,7 +137,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
               <Label className="text-sm font-medium">Filter by Department</Label>
               <Input 
                 placeholder="E.g. Engineering"
-                className="bg-background/50 border-border/50 focus-visible:ring-teal-500/30"
+                className="bg-background/50 border-border/50 focus-visible:ring-blue-500/30"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
               />
@@ -147,7 +147,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
               <Label className="text-sm font-medium">Start Date <span className="text-destructive">*</span></Label>
               <Input 
                 type="date"
-                className="bg-background/50 border-border/50 focus-visible:ring-teal-500/30"
+                className="bg-background/50 border-border/50 focus-visible:ring-blue-500/30"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
@@ -157,7 +157,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
               <Label className="text-sm font-medium">End Date <span className="text-destructive">*</span></Label>
               <Input 
                 type="date"
-                className="bg-background/50 border-border/50 focus-visible:ring-teal-500/30"
+                className="bg-background/50 border-border/50 focus-visible:ring-blue-500/30"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -173,7 +173,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
                     id="select-all" 
                     checked={isAllSelected}
                     onCheckedChange={handleSelectAll}
-                    className={isIndeterminate && !isAllSelected ? "data-[state=unchecked]:bg-teal-600 data-[state=unchecked]:text-white" : ""}
+                    className={isIndeterminate && !isAllSelected ? "data-[state=unchecked]:bg-blue-600 data-[state=unchecked]:text-white" : ""}
                   />
                   <Label htmlFor="select-all" className="text-xs text-muted-foreground cursor-pointer">Select All</Label>
                 </div>
@@ -218,7 +218,7 @@ export function AssignShiftModal({ open, onOpenChange }: Props) {
           </Button>
           <Button 
             onClick={handleSubmit} 
-            className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             disabled={assignMutation.isPending || selectedEmployees.size === 0}
           >
             {assignMutation.isPending ? "Assigning..." : "Assign Roster"}

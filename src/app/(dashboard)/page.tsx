@@ -29,7 +29,7 @@ export default function DashboardPage() {
 
   if (isError) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="fluid-container">
         <ErrorState onRetry={() => refetch()} />
       </div>
     );
@@ -40,7 +40,7 @@ export default function DashboardPage() {
   const firstName = user?.split(" ")[0] || "there";
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="fluid-container space-y-6">
       {/* Greeting */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
           {[
             { title: "Clients", icon: Building2, href: "/cadesk365/customer/view", color: "text-blue-600 dark:text-blue-400" },
             { title: "Client Service", icon: Briefcase, href: "/cadesk365/client-service/view", color: "text-emerald-600 dark:text-emerald-400" },
-            { title: "Compliance", icon: ClipboardCheck, href: "/cadesk365/item/view", color: "text-amber-600 dark:text-amber-400" },
+            { title: "Compliance", icon: ClipboardCheck, href: "/compliance/list", color: "text-amber-600 dark:text-amber-400" },
             { title: "Tasks", icon: CheckSquare, href: "/cadesk365/task/view", color: "text-violet-600 dark:text-violet-400" },
             { title: "ToDo", icon: ListTodo, href: "/cadesk365/todo/view", color: "text-rose-600 dark:text-rose-400" },
             { title: "Tracker", icon: ShieldCheck, href: "/cadesk365/compliance-tracker/view", color: "text-primary dark:text-primary/80" },
@@ -88,7 +88,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="auto-grid auto-grid-md">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)
         ) : (
@@ -142,34 +142,74 @@ export default function DashboardPage() {
         <div className="rounded-lg border bg-card p-5">
           <h2 className="text-sm font-medium text-foreground mb-4">My Tasks</h2>
           {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full rounded" />)}
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-[60px] w-full rounded-xl" />)}
             </div>
           ) : data?.my_todos_todos_open?.length ? (
-            <DataTable
-              columns={[
-                {
-                  accessorKey: "description",
-                  header: "Description",
-                  cell: ({ row }: any) => <span className="text-sm font-medium">{row.getValue("description")}</span>,
-                },
-                {
-                  accessorKey: "status",
-                  header: "Status",
-                  cell: ({ row }: any) => <StatusBadge status={row.getValue("status")} />,
-                },
-                {
-                  accessorKey: "due_date",
-                  header: "Due",
-                  cell: ({ row }: any) => <span className="text-xs text-muted-foreground">{formatDate(row.getValue("due_date"))}</span>,
-                },
-              ]}
-              data={data.my_todos_todos_open.slice(0, 10)}
-              pageSize={5}
-              hideToolbar
-            />
+            <div className="flex flex-col gap-3">
+              {(() => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const processedTasks = [...data.my_todos_todos_open]
+                  .filter((task: any) => task.status === "Open")
+                  .sort((a: any, b: any) => {
+                    const dateA = a.date || a.due_date;
+                    const dateB = b.date || b.due_date;
+                    const isOverdueA = dateA ? new Date(dateA) < today : false;
+                    const isOverdueB = dateB ? new Date(dateB) < today : false;
+
+                    if (isOverdueA && !isOverdueB) return -1;
+                    if (!isOverdueA && isOverdueB) return 1;
+
+                    const timeA = dateA ? new Date(dateA).getTime() : Infinity;
+                    const timeB = dateB ? new Date(dateB).getTime() : Infinity;
+                    return timeA - timeB;
+                  })
+                  .slice(0, 5);
+
+                if (processedTasks.length === 0) return null;
+
+                return processedTasks.map((task: any, idx: number) => {
+                  const taskDate = task.date || task.due_date;
+                  const isOverdue = taskDate ? new Date(taskDate) < today : false;
+
+                  return (
+                    <div key={idx} className={cn(
+                      "flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all gap-3",
+                      isOverdue
+                        ? "border-rose-500/20 hover:border-rose-500/40"
+                        : "bg-card hover:border-primary/20 hover:shadow-sm"
+                    )}>
+                      <div className="min-w-0 flex-1">
+                        <p className={cn(
+                          "text-sm font-bold leading-tight line-clamp-2"
+                        )}>
+                          {task.description}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <Clock className={cn("h-3.5 w-3.5", isOverdue ? "text-rose-500" : "text-muted-foreground")} />
+                          <span className={cn("text-xs font-medium", "text-muted-foreground")}>
+                            {formatDate(taskDate)} {isOverdue && "(Overdue)"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0">
+                        {isOverdue ? (
+                          <span className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">
+                            Overdue
+                          </span>
+                        ) : (
+                          <StatusBadge status={task.status} />
+                        )}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           ) : (
-            <EmptyState title="No open tasks" description="All your tasks are completed!" className="border-0" />
+            <EmptyState title="No open tasks" description="All your tasks are completed!" className="border-0 p-6" />
           )}
         </div>
 

@@ -280,7 +280,7 @@ export function DataTable<TData, TValue>({
       )}
 
       {viewMode === "grid" && renderGridCard && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="auto-grid auto-grid-xl">
           {isLoading ? (
             Array.from({ length: Math.min(currentPageSize, 4) }).map((_, idx) => (
               <div key={idx} className="h-32 rounded-lg border bg-card animate-pulse" />

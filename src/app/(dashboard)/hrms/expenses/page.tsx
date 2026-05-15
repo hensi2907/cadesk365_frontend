@@ -87,7 +87,7 @@ export default function ExpensesPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="auto-grid auto-grid-md">
         <StatCard
           title="Total Claimed (YTD)"
           value={formatCurrency(data?.total_claimed || 0)}

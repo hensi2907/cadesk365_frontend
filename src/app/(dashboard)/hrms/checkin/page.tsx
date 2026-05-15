@@ -90,9 +90,9 @@ export default function CheckinPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
-      <PageHeader 
-        title="Check In / Out" 
+    <div className="space-y-8 fluid-container">
+      <PageHeader
+        title="Check In / Out"
         description="Log your daily attendance directly from the portal."
       >
         <Button onClick={() => router.push(getListRoute("Employee Checkin"))} variant="outline">
@@ -105,7 +105,7 @@ export default function CheckinPage() {
         {/* Action Card */}
         <div className="rounded-xl border bg-card p-8 shadow-sm text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-          
+
           <div className="mb-8">
             <div className="text-muted-foreground font-medium tracking-widest uppercase text-xs mb-2">Current Time</div>
             <div className="text-5xl font-bold tracking-tight text-foreground font-mono">
@@ -137,11 +137,10 @@ export default function CheckinPage() {
 
             <Button
               size="lg"
-              className={`w-full max-w-xs h-14 text-base font-semibold shadow-md ${
-                data?.next_action === "IN" 
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white" 
+              className={`w-full max-w-xs h-14 text-base font-semibold shadow-md ${data?.next_action === "IN"
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                   : "bg-amber-600 hover:bg-amber-700 text-white"
-              }`}
+                }`}
               onClick={handleAction}
               disabled={checkinMutation.isPending || isLoading}
             >
@@ -154,7 +153,7 @@ export default function CheckinPage() {
               )}
               {checkinMutation.isPending ? "Processing..." : `Check ${data?.next_action || "In"}`}
             </Button>
-            
+
             <p className="text-xs text-muted-foreground mt-2">
               Make sure to allow location access if prompted by your browser.
             </p>

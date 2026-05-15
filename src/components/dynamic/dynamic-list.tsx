@@ -193,7 +193,7 @@ export function DynamicList({ doctypeMeta, permissions }: DynamicListProps) {
 
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
+    <div className="space-y-6 fluid-container pb-12">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card/40 backdrop-blur-md p-5 rounded-2xl border border-border/30 shadow-sm">
         <PageHeader
           title={doctypeMeta.name}

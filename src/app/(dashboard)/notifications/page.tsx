@@ -72,7 +72,7 @@ export default function NotificationsPage() {
   const items = activeTab === "notifications" ? (data?.notifications || []) : (data?.reminders || []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col">
+    <div className="space-y-6 fluid-container h-full flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <PageHeader
           title="Notifications Center"
@@ -126,7 +126,7 @@ export default function NotificationsPage() {
                 </span>
               )}
             </button>
-            <button
+            {/*<button
               onClick={() => handleTabChange("reminders")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all duration-200",
@@ -142,7 +142,7 @@ export default function NotificationsPage() {
                   {data.upcoming_reminders}
                 </span>
               )}
-            </button>
+            </button>*/}
           </div>
 
           {/* List Content */}
@@ -278,7 +278,7 @@ export default function NotificationsPage() {
                       : selectedItem.remind_at}
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground leading-tight">
+                <h2 className="text-sm text-foreground leading-tight">
                   {activeTab === "notifications" ? selectedItem.subject : selectedItem.description}
                 </h2>
               </div>
@@ -335,9 +335,10 @@ export default function NotificationsPage() {
                 {activeTab === "notifications" && !selectedItem.read && (
                   <Button
                     variant="default"
-                    className="shadow-sm"
+                    className="shadow-sm !bg-primary/90"
                     onClick={() => markReadMutation.mutate(selectedItem.name)}
                     disabled={markReadMutation.isPending}
+
                   >
                     <Check className="mr-2 h-4 w-4" /> Mark as Read
                   </Button>

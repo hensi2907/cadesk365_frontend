@@ -24,7 +24,7 @@ import { toast } from "sonner";
 
 export default function AttendanceToolPage() {
   const queryClient = useQueryClient();
-  
+
   // Filters
   const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [department, setDepartment] = useState("");
@@ -46,8 +46,8 @@ export default function AttendanceToolPage() {
     if (!employees) return [];
     if (!searchQuery) return employees;
     const lowerQuery = searchQuery.toLowerCase();
-    return employees.filter(e => 
-      e.employee.toLowerCase().includes(lowerQuery) || 
+    return employees.filter(e =>
+      e.employee.toLowerCase().includes(lowerQuery) ||
       e.employee_name.toLowerCase().includes(lowerQuery)
     );
   }, [employees, searchQuery]);
@@ -133,14 +133,14 @@ export default function AttendanceToolPage() {
 
   return (
     <div className="flex-1 space-y-8 p-8 pt-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col space-y-2"
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-teal-500/10 dark:bg-teal-500/20 rounded-2xl shadow-sm border border-teal-500/20">
-            <CalendarCheck className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+          <div className="p-3 bg-blue-500/10 dark:bg-blue-500/20 rounded-2xl shadow-sm border border-blue-500/20">
+            <CalendarCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground/90">
             Attendance Tool
@@ -151,7 +151,7 @@ export default function AttendanceToolPage() {
         </p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -166,35 +166,35 @@ export default function AttendanceToolPage() {
           <CardContent className="flex flex-wrap items-end gap-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Attendance Date <span className="text-destructive">*</span></Label>
-              <Input 
-                type="date" 
-                className="h-10 bg-background/50 border-border/50 focus-visible:ring-teal-500/30 w-[200px]" 
-                value={date} 
-                onChange={(e) => setDate(e.target.value)} 
+              <Input
+                type="date"
+                className="h-10 bg-background/50 border-border/50 focus-visible:ring-blue-500/30 w-[200px]"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Department</Label>
-              <Input 
+              <Input
                 placeholder="E.g. Engineering"
-                className="h-10 bg-background/50 border-border/50 focus-visible:ring-teal-500/30 w-[200px]" 
-                value={department} 
-                onChange={(e) => setDepartment(e.target.value)} 
+                className="h-10 bg-background/50 border-border/50 focus-visible:ring-blue-500/30 w-[200px]"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-muted-foreground">Company</Label>
-              <Input 
+              <Input
                 placeholder="E.g. CADESK365"
-                className="h-10 bg-background/50 border-border/50 focus-visible:ring-teal-500/30 w-[200px]" 
-                value={company} 
-                onChange={(e) => setCompany(e.target.value)} 
+                className="h-10 bg-background/50 border-border/50 focus-visible:ring-blue-500/30 w-[200px]"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
               />
             </div>
 
-            <Button onClick={() => refetch()} variant="outline" className="h-10 border-teal-500/30 hover:bg-teal-500/10 hover:text-teal-600 transition-colors">
+            <Button onClick={() => refetch()} variant="outline" className="h-10 border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-600 transition-colors">
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Reload Roster
             </Button>
@@ -202,7 +202,7 @@ export default function AttendanceToolPage() {
         </Card>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -215,13 +215,13 @@ export default function AttendanceToolPage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search employees..."
-                className="pl-8 bg-background/50 border-border/50 focus-visible:ring-teal-500/30"
+                className="pl-8 bg-background/50 border-border/50 focus-visible:ring-blue-500/30"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
-            <Badge variant="secondary" className="hidden sm:flex text-sm px-3 py-1">
+
+            <Badge variant="secondary" className="hidden bg-primary/80 sm:flex text-sm px-3 py-1">
               {filteredEmployees.length} Records
             </Badge>
           </div>
@@ -230,24 +230,24 @@ export default function AttendanceToolPage() {
             <span className="text-sm font-medium text-muted-foreground mr-2 whitespace-nowrap">
               {selectedEmployees.size} Selected
             </span>
-            <Button 
-              size="sm" 
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition-all"
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all"
               onClick={() => handleBulkAction("Present")}
               disabled={selectedEmployees.size === 0 || markMutation.isPending}
             >
               Mark Present
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className="bg-rose-500 hover:bg-rose-600 text-white shadow-sm transition-all"
               onClick={() => handleBulkAction("Absent")}
               disabled={selectedEmployees.size === 0 || markMutation.isPending}
             >
               Mark Absent
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant="outline"
               className="border-border/50 hover:bg-accent/50 transition-all"
               onClick={() => handleBulkAction("Half Day")}
@@ -255,8 +255,8 @@ export default function AttendanceToolPage() {
             >
               Half Day
             </Button>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant="outline"
               className="border-border/50 hover:bg-accent/50 transition-all"
               onClick={() => handleBulkAction("Work From Home")}
@@ -274,8 +274,8 @@ export default function AttendanceToolPage() {
               <TableHeader className="bg-muted/30 backdrop-blur-md sticky top-0 z-10">
                 <TableRow>
                   <TableHead className="w-[50px] text-center">
-                    <Checkbox 
-                      checked={isAllSelected} 
+                    <Checkbox
+                      checked={isAllSelected}
                       onCheckedChange={handleSelectAll}
                       className={isIndeterminate && !isAllSelected ? "data-[state=unchecked]:bg-primary data-[state=unchecked]:text-primary-foreground" : ""}
                     />
@@ -294,8 +294,8 @@ export default function AttendanceToolPage() {
                   <TableRow>
                     <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="p-3 bg-teal-500/10 rounded-full">
-                          <RefreshCw className="w-6 h-6 animate-spin text-teal-600" />
+                        <div className="p-3 bg-blue-500/10 rounded-full">
+                          <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
                         </div>
                         <span className="font-medium">Fetching roster data...</span>
                       </div>
@@ -312,12 +312,12 @@ export default function AttendanceToolPage() {
                   </TableRow>
                 ) : (
                   filteredEmployees.map((emp) => (
-                    <TableRow 
-                      key={emp.employee} 
-                      className={`transition-all duration-200 group ${selectedEmployees.has(emp.employee) ? 'bg-teal-500/5 dark:bg-teal-500/10 border-l-2 border-teal-500' : 'hover:bg-muted/40 border-l-2 border-transparent'}`}
+                    <TableRow
+                      key={emp.employee}
+                      className={`transition-all duration-200 group ${selectedEmployees.has(emp.employee) ? 'bg-blue-500/5 dark:bg-blue-500/10 border-l-2 border-blue-500' : 'hover:bg-muted/40 border-l-2 border-transparent'}`}
                     >
                       <TableCell className="text-center">
-                        <Checkbox 
+                        <Checkbox
                           checked={selectedEmployees.has(emp.employee)}
                           onCheckedChange={(c) => handleSelect(emp.employee, !!c)}
                         />
@@ -349,7 +349,7 @@ export default function AttendanceToolPage() {
                       <TableCell className="text-right">
                         {emp.status === "Not Marked" ? (
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-teal-600 hover:text-teal-700 hover:bg-teal-500/10 rounded-full" onClick={() => handleInlineAction(emp.employee, "Present")}>
+                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-500/10 rounded-full" onClick={() => handleInlineAction(emp.employee, "Present")}>
                               <CheckCircle2 className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-full" onClick={() => handleInlineAction(emp.employee, "Absent")}>
@@ -357,8 +357,8 @@ export default function AttendanceToolPage() {
                             </Button>
                           </div>
                         ) : (
-                          <Select 
-                            value={emp.status} 
+                          <Select
+                            value={emp.status}
                             onValueChange={(val) => handleInlineAction(emp.employee, val)}
                           >
                             <SelectTrigger className="h-8 w-[120px] text-xs ml-auto">

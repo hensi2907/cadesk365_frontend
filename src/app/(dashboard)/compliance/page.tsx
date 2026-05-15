@@ -84,7 +84,7 @@ export default function CompliancePage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
+    <div className="space-y-5 fluid-container">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Compliance Tracker</h1>
         <p className="text-sm text-muted-foreground mt-1">Track and manage all client compliance deadlines</p>

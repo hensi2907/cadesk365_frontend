@@ -25,7 +25,9 @@ export default function EmployeesPage() {
   const { data: employees, isLoading, isError, refetch } = useQuery({
     queryKey: ["employees"],
     queryFn: () => getEmployeeList(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const employeeList = employees || [];
@@ -80,7 +82,7 @@ export default function EmployeesPage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-6xl mx-auto">
+    <div className="space-y-5 fluid-container">
       <PageHeader title="Team" description="Manage team members and view workload.">
         {/* <Button onClick={() => router.push("/hrms/attendance")} size="sm" className="gap-1.5">
           <Calendar className="h-3.5 w-3.5" />
@@ -88,7 +90,7 @@ export default function EmployeesPage() {
         </Button> */}
       </PageHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="auto-grid auto-grid-md">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)
         ) : (

@@ -9,6 +9,7 @@ import { slugifyDoctype } from "./doctype-slug";
 export function getRecordRoute(doctype: string, name: string): string {
   const slug = slugifyDoctype(doctype);
   const encodedName = encodeURIComponent(name);
+  if (slug === "item") return `/compliance/${encodedName}`;
   return `/cadesk365/${slug}/${encodedName}`;
 }
 
@@ -19,6 +20,7 @@ export function getRecordRoute(doctype: string, name: string): string {
  */
 export function getListRoute(doctype: string): string {
   const slug = slugifyDoctype(doctype);
+  if (slug === "item") return `/compliance/list`;
   return `/cadesk365/${slug}/view`;
 }
 
@@ -29,5 +31,6 @@ export function getListRoute(doctype: string): string {
  */
 export function getNewRecordRoute(doctype: string): string {
   const slug = slugifyDoctype(doctype);
+  if (slug === "item") return `/compliance/new`;
   return `/cadesk365/${slug}/new`;
 }

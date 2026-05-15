@@ -11,10 +11,96 @@ import { logoutUser } from "@/lib/api/dashboard";
 import {
   User, Briefcase, Building, Wallet, CreditCard, Info,
   Settings, Shield, BarChart3, Lock, Bell, LogOut,
-  Mail, Printer, Download, UploadCloud, CheckSquare, Database, Users, Calendar
+  Mail, Printer, Download, UploadCloud, CheckSquare, Database, Users, Calendar,
+  UserPlus, Clock, GraduationCap, FileText, ClipboardList, MapPin, Award, Heart, 
+  ShieldAlert, ListChecks, ArrowRightLeft, TrendingUp, Handshake, Zap, HelpCircle,
+  FileCheck, ShieldCheck, PieChart, Activity, MessageSquare, Share2, Search
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { getListRoute } from "@/lib/utils/route";
+
+const hrShortcuts = [
+  { title: "Job Opening Template", doctype: "Job Opening Template", icon: UserPlus, category: "Recruitment" },
+  { title: "Shift Schedule Assignment", doctype: "Shift Schedule Assignment", icon: Clock, category: "Attendance & Shifts" },
+  { title: "Shift Schedule", doctype: "Shift Schedule", icon: Clock, category: "Attendance & Shifts" },
+  { title: "Shift Location", doctype: "Shift Location", icon: MapPin, category: "Attendance & Shifts" },
+  { title: "Shift Assignment Tool", doctype: "Shift Assignment Tool", icon: Zap, category: "Attendance & Shifts" },
+  { title: "Job Offer Term Template", doctype: "Job Offer Term Template", icon: FileText, category: "Recruitment" },
+  { title: "PWA Notification", doctype: "PWA Notification", icon: Bell, category: "Others" },
+  { title: "Vehicle Service Item", doctype: "Vehicle Service Item", icon: Settings, category: "Others" },
+  { title: "Employee Feedback Criteria", doctype: "Employee Feedback Criteria", icon: ListChecks, category: "Performance" },
+  { title: "Employee Performance Feedback", doctype: "Employee Performance Feedback", icon: Activity, category: "Performance" },
+  { title: "Job Requisition", doctype: "Job Requisition", icon: ClipboardList, category: "Recruitment" },
+  { title: "Appraisal", doctype: "Appraisal", icon: Award, category: "Performance" },
+  { title: "KRA", doctype: "KRA", icon: TrendingUp, category: "Performance" },
+  { title: "Goal", doctype: "Goal", icon: Award, category: "Performance" },
+  { title: "Appraisal Cycle", doctype: "Appraisal Cycle", icon: Calendar, category: "Performance" },
+  { title: "Training Feedback", doctype: "Training Feedback", icon: GraduationCap, category: "Performance" },
+  { title: "Employee Advance", doctype: "Employee Advance", icon: Wallet, category: "Others" },
+  { title: "Exit Interview", doctype: "Exit Interview", icon: Handshake, category: "Lifecycle" },
+  { title: "Full and Final Statement", doctype: "Full and Final Statement", icon: FileCheck, category: "Lifecycle" },
+  { title: "Employee Grievance", doctype: "Employee Grievance", icon: ShieldAlert, category: "Others" },
+  { title: "Grievance Type", doctype: "Grievance Type", icon: Settings, category: "Others" },
+  { title: "Interview Feedback", doctype: "Interview Feedback", icon: MessageSquare, category: "Recruitment" },
+  { title: "Interview", doctype: "Interview", icon: UserPlus, category: "Recruitment" },
+  { title: "Interview Type", doctype: "Interview Type", icon: Settings, category: "Recruitment" },
+  { title: "Interview Round", doctype: "Interview Round", icon: ListChecks, category: "Recruitment" },
+  { title: "Employee Referral", doctype: "Employee Referral", icon: Users, category: "Recruitment" },
+  { title: "Leave Policy Assignment", doctype: "Leave Policy Assignment", icon: FileText, category: "Leaves" },
+  { title: "Appointment Letter", doctype: "Appointment Letter", icon: FileCheck, category: "Lifecycle" },
+  { title: "Appointment Letter Template", doctype: "Appointment Letter Template", icon: FileText, category: "Lifecycle" },
+  { title: "Employee Checkin", doctype: "Employee Checkin", icon: Clock, category: "Attendance & Shifts" },
+  { title: "Leave Ledger Entry", doctype: "Leave Ledger Entry", icon: Database, category: "Leaves" },
+  { title: "Employee Skill Map", doctype: "Employee Skill Map", icon: MapPin, category: "Lifecycle" },
+  { title: "Skill", doctype: "Skill", icon: Award, category: "Lifecycle" },
+  { title: "Job Applicant Source", doctype: "Job Applicant Source", icon: Share2, category: "Recruitment" },
+  { title: "Identification Document Type", doctype: "Identification Document Type", icon: ShieldCheck, category: "Others" },
+  { title: "Purpose of Travel", doctype: "Purpose of Travel", icon: MapPin, category: "Others" },
+  { title: "Travel Request", doctype: "Travel Request", icon: Briefcase, category: "Others" },
+  { title: "Employee Separation", doctype: "Employee Separation", icon: LogOut, category: "Lifecycle" },
+  { title: "Employee Separation Template", doctype: "Employee Separation Template", icon: FileText, category: "Lifecycle" },
+  { title: "Employee Onboarding Template", doctype: "Employee Onboarding Template", icon: FileText, category: "Lifecycle" },
+  { title: "Employee Onboarding", doctype: "Employee Onboarding", icon: UserPlus, category: "Lifecycle" },
+  { title: "Employee Promotion", doctype: "Employee Promotion", icon: TrendingUp, category: "Lifecycle" },
+  { title: "Employee Transfer", doctype: "Employee Transfer", icon: ArrowRightLeft, category: "Lifecycle" },
+  { title: "Staffing Plan", doctype: "Staffing Plan", icon: PieChart, category: "Others" },
+  { title: "Shift Request", doctype: "Shift Request", icon: Clock, category: "Attendance & Shifts" },
+  { title: "Shift Assignment", doctype: "Shift Assignment", icon: Briefcase, category: "Attendance & Shifts" },
+  { title: "Shift Type", doctype: "Shift Type", icon: Settings, category: "Attendance & Shifts" },
+  { title: "Employee Grade", doctype: "Employee Grade", icon: Award, category: "Others" },
+  { title: "Leave Policy", doctype: "Leave Policy", icon: FileText, category: "Leaves" },
+  { title: "Attendance Request", doctype: "Attendance Request", icon: CheckSquare, category: "Attendance & Shifts" },
+  { title: "Leave Encashment", doctype: "Leave Encashment", icon: Wallet, category: "Leaves" },
+  { title: "Leave Period", doctype: "Leave Period", icon: Calendar, category: "Leaves" },
+  { title: "Compensatory Leave Request", doctype: "Compensatory Leave Request", icon: ClipboardList, category: "Leaves" },
+  { title: "Daily Work Summary Group", doctype: "Daily Work Summary Group", icon: Users, category: "Others" },
+  { title: "Training Program", doctype: "Training Program", icon: GraduationCap, category: "Performance" },
+  { title: "Employee Health Insurance", doctype: "Employee Health Insurance", icon: Heart, category: "Lifecycle" },
+  { title: "Daily Work Summary", doctype: "Daily Work Summary", icon: FileText, category: "Others" },
+  { title: "Training Result", doctype: "Training Result", icon: Award, category: "Performance" },
+  { title: "Vehicle Log", doctype: "Vehicle Log", icon: ClipboardList, category: "Others" },
+  { title: "Training Event", doctype: "Training Event", icon: Calendar, category: "Performance" },
+  { title: "Interest", doctype: "Interest", icon: Heart, category: "Lifecycle" },
+  { title: "Employee Attendance Tool", doctype: "Employee Attendance Tool", icon: Zap, category: "Attendance & Shifts" },
+  { title: "Offer Term", doctype: "Offer Term", icon: ListChecks, category: "Recruitment" },
+  { title: "Job Offer", doctype: "Job Offer", icon: Handshake, category: "Recruitment" },
+  { title: "HR Settings", doctype: "HR Settings", icon: Settings, category: "Others" },
+  { title: "Leave Type", doctype: "Leave Type", icon: Settings, category: "Leaves" },
+  { title: "Leave Allocation", doctype: "Leave Allocation", icon: Calendar, category: "Leaves" },
+  { title: "Leave Application", doctype: "Leave Application", icon: Calendar, category: "Leaves" },
+  { title: "Leave Block List", doctype: "Leave Block List", icon: ShieldAlert, category: "Leaves" },
+  { title: "Job Applicant", doctype: "Job Applicant", icon: UserPlus, category: "Recruitment" },
+  { title: "Upload Attendance", doctype: "Upload Attendance", icon: UploadCloud, category: "Attendance & Shifts" },
+  { title: "Job Opening", doctype: "Job Opening", icon: Briefcase, category: "Recruitment" },
+  { title: "Leave Control Panel", doctype: "Leave Control Panel", icon: Zap, category: "Leaves" },
+  { title: "Expense Claim", doctype: "Expense Claim", icon: CreditCard, category: "Others" },
+  { title: "Employment Type", doctype: "Employment Type", icon: Settings, category: "Others" },
+  { title: "Attendance", doctype: "Attendance", icon: CheckSquare, category: "Attendance & Shifts" },
+  { title: "Appraisal Template", doctype: "Appraisal Template", icon: FileText, category: "Performance" },
+  { title: "Expense Claim Type", doctype: "Expense Claim Type", icon: Settings, category: "Others" },
+];
 
 const settingsSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -63,6 +149,7 @@ function ActionCard({ icon: Icon, title, desc, href }: { icon: any, title: strin
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState("account");
+  const [hrSearch, setHrSearch] = React.useState("");
 
   React.useEffect(() => {
     const savedTab = localStorage.getItem("cadesk365_settings_tab");
@@ -130,7 +217,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="space-y-8 max-w-[1200px] mx-auto">
+    <div className="space-y-8 fluid-container">
       <PageHeader
         title="Settings & Profile"
         description="Manage your account preferences and personal information."
@@ -282,7 +369,7 @@ export default function SettingsPage() {
                   <ActionCard icon={Building} title="Company" desc="Manage accounts" href={`/cadesk365/company/${encodeURIComponent(defaultCompany)}`} />
                   <ActionCard icon={User} title="User Management" desc="Manage accounts" href="/cadesk365/user/view" />
                   <ActionCard icon={Building} title="Client Master" desc="Client records" href="/cadesk365/customer/view" />
-                  <ActionCard icon={Shield} title="Compliance Master" desc="Items and rules" href="/cadesk365/item/view?item_group=CA+Service" />
+                  <ActionCard icon={Shield} title="Compliance Master" desc="Items and rules" href="/compliance/list" />
                   <ActionCard icon={Briefcase} title="Employee Records" desc="HR data" href="/cadesk365/employee/view" />
                 </div>
               </div>
@@ -318,7 +405,7 @@ export default function SettingsPage() {
                   </span>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <ActionCard icon={Database} title="Compliance" desc="Manage data" href="/cadesk365/item/view" />
+                  <ActionCard icon={Database} title="Compliance" desc="Manage data" href="/compliance/list" />
                   <ActionCard icon={Database} title="Compliance Profile" desc="Manage data" href="/cadesk365/compliance-profile/view" />
                   <ActionCard icon={Database} title="Business Entity" desc="Manage data" href="/cadesk365/business-entity/view" />
                   <ActionCard icon={Database} title="Compliance Tasks" desc="Manage data" href="/cadesk365/compliance-tasks/view" />
@@ -340,69 +427,65 @@ export default function SettingsPage() {
           {/* 2.5 HR PANEL */}
           {activeTab === "hr" && isHR && (
             <div className="space-y-8 fade-in">
-              {/* Core HR */}
-              <div className="rounded-lg border bg-card p-5 border-t-4 border-t-emerald-500">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Users className="h-5 w-5 text-muted-foreground" />
-                    Core HR
-                  </h3>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                    HR
-                  </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search HR shortcuts..."
+                    className="pl-10 h-10"
+                    value={hrSearch}
+                    onChange={(e) => setHrSearch(e.target.value)}
+                  />
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <ActionCard icon={User} title="Employee" desc="Manage employees" href="/cadesk365/employee/view" />
-                  <ActionCard icon={Building} title="Department" desc="Company departments" href="/cadesk365/department/view" />
-                  <ActionCard icon={Briefcase} title="Designation" desc="Job titles" href="/cadesk365/designation/view" />
+                <div className="text-xs text-muted-foreground">
+                  Showing {hrShortcuts.filter(s => s.title.toLowerCase().includes(hrSearch.toLowerCase())).length} shortcuts
                 </div>
               </div>
 
-              {/* Time & Attendance */}
-              <div className="rounded-lg border bg-card p-5 border-t-4 border-t-blue-500">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    Time & Attendance
-                  </h3>
-                </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <ActionCard icon={CheckSquare} title="Attendance" desc="Daily attendance" href="/cadesk365/attendance/view" />
-                  <ActionCard icon={CheckSquare} title="Employee Checkin" desc="Checkin logs" href="/cadesk365/employee-checkin/view" />
-                  <ActionCard icon={CheckSquare} title="Attendance Request" desc="Regularizations" href="/cadesk365/attendance-request/view" />
-                  <ActionCard icon={Briefcase} title="Shift Assignment" desc="Manage shifts" href="/cadesk365/shift-assignment/view" />
-                  <ActionCard icon={Building} title="Holiday List" desc="Company holidays" href="/cadesk365/holiday-list/view" />
-                </div>
-              </div>
+              {(() => {
+                const filtered = hrShortcuts.filter(s => 
+                  s.title.toLowerCase().includes(hrSearch.toLowerCase()) ||
+                  s.category.toLowerCase().includes(hrSearch.toLowerCase())
+                );
+                const categories = Array.from(new Set(filtered.map(s => s.category))).sort();
 
-              {/* Leaves & Payroll */}
-              <div className="rounded-lg border bg-card p-5 border-t-4 border-t-orange-500">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-muted-foreground" />
-                    Leaves & Payroll
-                  </h3>
-                </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <ActionCard icon={Wallet} title="Leave Application" desc="Manage leaves" href="/cadesk365/leave-application/view" />
-                  <ActionCard icon={CreditCard} title="Expense Claim" desc="Employee expenses" href="/cadesk365/expense-claim/view" />
-                  <ActionCard icon={CreditCard} title="Salary Slip" desc="Payroll slips" href="/cadesk365/salary-slip/view" />
-                </div>
-              </div>
+                if (filtered.length === 0) {
+                  return (
+                    <div className="text-center py-20 border-2 border-dashed rounded-xl bg-muted/20">
+                      <Search className="h-10 w-10 text-muted-foreground mx-auto mb-4 opacity-20" />
+                      <p className="text-lg font-medium text-muted-foreground">No results found</p>
+                      <p className="text-sm text-muted-foreground mt-1">Try searching for a different term or category</p>
+                    </div>
+                  );
+                }
 
-              {/* Performance */}
-              <div className="rounded-lg border bg-card p-5 border-t-4 border-t-purple-500">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-muted-foreground" />
-                    Performance
-                  </h3>
-                </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <ActionCard icon={BarChart3} title="Employee Performance" desc="Performance logs" href="/cadesk365/employee-performance/view" />
-                  <ActionCard icon={BarChart3} title="Appraisal" desc="Appraisals" href="/cadesk365/appraisal/view" />
-                </div>
-              </div>
+                return categories.map(category => (
+                  <div key={category} className="space-y-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 px-1">
+                      {category === "Recruitment" && <UserPlus className="h-4 w-4" />}
+                      {category === "Attendance & Shifts" && <Clock className="h-4 w-4" />}
+                      {category === "Lifecycle" && <ArrowRightLeft className="h-4 w-4" />}
+                      {category === "Performance" && <Award className="h-4 w-4" />}
+                      {category === "Leaves" && <Calendar className="h-4 w-4" />}
+                      {category === "Others" && <Settings className="h-4 w-4" />}
+                      {category}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {filtered
+                        .filter(s => s.category === category)
+                        .map(s => (
+                          <ActionCard
+                            key={s.title}
+                            icon={s.icon}
+                            title={s.title}
+                            desc={`Manage ${s.title}`}
+                            href={getListRoute(s.doctype)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                ));
+              })()}
             </div>
           )}
 
